@@ -2,7 +2,7 @@
 // v1.0.2 - Auth Refactor Update
 
 // 🔧 使用时间戳版本号确保每次部署都清除旧缓存
-const BUILD_TIMESTAMP = '2026-05-26-005';  // 部署时请更新此时间戳
+const BUILD_TIMESTAMP = '2026-05-26-006';  // 部署时请更新此时间戳
 const CACHE_VERSION = `worklist-v3-${BUILD_TIMESTAMP}`;
 const RUNTIME_CACHE = `worklist-runtime-v3-${BUILD_TIMESTAMP}`;
 const FIREBASE_CACHE = `worklist-firebase-v3-${BUILD_TIMESTAMP}`;
@@ -98,9 +98,11 @@ if (request.method !== 'GET') {
 }
   
   // Firebase and Google API requests - Network First strategy with iOS fixes
+  // gstatic.com hosts Firebase SDK files (firebase-app.js, firebase-auth.js, firebase-firestore.js)
   if (url.hostname.includes('firebase') || 
       url.hostname.includes('googleapis.com') ||
-      url.hostname.includes('google.com')) {
+      url.hostname.includes('google.com') ||
+      url.hostname.includes('gstatic.com')) {
     event.respondWith(
       fetch(request, {
         mode: 'cors',
