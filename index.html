@@ -1,0 +1,3892 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+ <meta name="theme-color" content="#007aff">
+ <link rel="manifest" href="./manifest.json">
+ <!-- iOS PWA Meta Tags -->
+ <meta name="apple-mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+ <meta name="apple-mobile-web-app-title" content="EV Planner">
+ <meta name="apple-itunes-app" content="app-id=none">
+ <!-- Prevent zoom and pinch gestures on iOS -->
+ <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+ <!-- Apple Touch Icon (required for iOS) -->
+ <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+ <link rel="apple-touch-startup-image" href="./apple-touch-icon.png">
+ <link rel="icon" type="image/png" href="./favicon.png">
+ <!-- Prevent iOS from caching -->
+ <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+ <meta http-equiv="pragma" content="no-cache">
+ <meta http-equiv="expires" content="0">
+ <!-- iOS PWA Optimizer (Must load before Firebase) -->
+ <script src="./ios-optimizer.js" defer></script>
+ <title>EV Work Planner</title>
+ <style>
+
+:root {
+ color-scheme: light;
+ --bg: #f5f6f4;
+ --panel: rgba(255, 255, 255, 0.84);
+ --ink: #1d1d1f;
+ --muted: #6e6e73;
+ --line: rgba(60, 60, 67, 0.16);
+ --accent: #007aff;
+ --accent-strong: #005ecb;
+ --accent-soft: #e8f2ff;
+ --warning: #b76b18;
+ --danger: #b13d3d;
+ --shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
+ font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+ box-sizing: border-box;
+}
+
+body {
+ margin: 0;
+ background: linear-gradient(180deg, #fbfbfd 0%, #f5f6f8 100%);
+ color: var(--ink);
+}
+
+button,
+input,
+select,
+textarea {
+ font: inherit;
+}
+
+button,
+select {
+ cursor: pointer;
+}
+
+.app-shell {
+ width: min(1440px, 100%);
+ margin: 0 auto;
+ padding: 22px;
+}
+
+.topbar {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 14px;
+ margin-bottom: 14px;
+ padding: 8px 12px;
+}
+
+.topbar-brand h1 {
+ margin: 0;
+ font-size: 18px;
+ font-weight: 700;
+ color: var(--ink);
+}
+
+.topbar-actions {
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ margin-left: auto;
+}
+
+.current-user {
+ font-weight: 600;
+ color: var(--accent);
+ padding: 2px 8px;
+ background: rgba(0, 122, 255, 0.12);
+ border-radius: 999px;
+ font-size: 12px;
+ white-space: nowrap;
+}
+
+.icon-button {
+ width: 34px;
+ min-height: 34px;
+ border-radius: 10px;
+ font-size: 18px;
+ padding: 0;
+}
+
+.eyebrow {
+ margin: 0 0 4px;
+ color: var(--accent);
+ font-size: 13px;
+ font-weight: 700;
+ text-transform: uppercase;
+ letter-spacing: 0;
+}
+
+.eyebrow {
+ margin: 0 0 4px;
+ color: var(--accent);
+ font-size: 13px;
+ font-weight: 700;
+ text-transform: uppercase;
+ letter-spacing: 0;
+}
+
+h1,
+h2,
+h3,
+p {
+ margin: 0;
+}
+
+h1 {
+ font-size: 34px;
+}
+
+h2 {
+ font-size: 20px;
+}
+
+h3 {
+ font-size: 15px;
+ margin-bottom: 10px;
+}
+
+.top-actions,
+.bulk-actions {
+ display: flex;
+ align-items: center;
+ gap: 10px;
+ flex-wrap: wrap;
+}
+
+.icon-button,
+.sync-button,
+.bulk-actions button,
+.calendar-actions button,
+.primary-button,
+.task-card button,
+.export-link {
+ border: 1px solid var(--line);
+ background: #fff;
+ color: var(--ink);
+ min-height: 40px;
+ border-radius: 8px;
+ padding: 0 14px;
+ text-decoration: none;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+}
+
+.icon-button {
+ width: 34px;
+ min-height: 34px;
+ padding: 0;
+ font-size: 18px;
+ border-radius: 10px;
+}
+
+.sync-button {
+ gap: 7px;
+ border-color: rgba(0, 122, 255, 0.28);
+ background: var(--accent);
+ color: white;
+ font-weight: 750;
+}
+
+.sync-button strong {
+ font-size: 14px;
+}
+
+.sync-button span {
+ font-size: 19px;
+}
+
+.view-tabs {
+ display: grid;
+ grid-template-columns: repeat(3, minmax(0, 1fr));
+ gap: 4px;
+ margin-bottom: 18px;
+ padding: 4px;
+ border: 1px solid var(--line);
+ border-radius: 10px;
+ background: rgba(255, 255, 255, 0.66);
+ box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+}
+
+.view-tabs button {
+ min-height: 42px;
+ border: 0;
+ border-radius: 8px;
+ background: transparent;
+ color: var(--muted);
+ font-weight: 760;
+}
+
+.view-tabs button.active {
+ background: #fff;
+ color: var(--accent);
+ box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.primary-button {
+ width: 100%;
+ border-color: var(--accent);
+ background: var(--accent);
+ color: white;
+ font-weight: 700;
+}
+
+.layout {
+ display: grid;
+ grid-template-columns: minmax(310px, 390px) minmax(0, 1fr);
+ gap: 18px;
+ align-items: start;
+}
+
+body[data-view="add"] .layout {
+ grid-template-columns: minmax(310px, 520px) minmax(0, 1fr);
+}
+
+body[data-view="calendar"] .layout,
+body[data-view="todo"] .layout,
+body[data-view="stats"] .layout {
+ grid-template-columns: minmax(0, 1fr);
+}
+
+body[data-view="add"] [data-view-panel]:not([data-view-panel="add"]),
+body[data-view="calendar"] [data-view-panel]:not([data-view-panel="calendar"]),
+body[data-view="todo"] [data-view-panel]:not([data-view-panel="todo"]),
+body[data-view="stats"] [data-view-panel]:not([data-view-panel="stats"]) {
+ display: none !important;
+}
+
+.panel {
+ background: var(--panel);
+ border: 1px solid var(--line);
+ border-radius: 8px;
+ box-shadow: var(--shadow);
+ padding: 18px;
+ backdrop-filter: blur(18px);
+}
+
+.composer {
+ grid-column: 1;
+ grid-row: 1;
+ position: sticky;
+ top: 18px;
+}
+
+.dashboard {
+ grid-column: 2;
+ grid-row: 1;
+}
+
+.calendar-panel {
+ grid-column: 2;
+ grid-row: 2;
+}
+
+.options-panel {
+ grid-column: 1;
+ grid-row: 2 / span 2;
+}
+
+.task-panel {
+ grid-column: 2;
+ grid-row: 3;
+}
+
+body[data-view="add"] .composer {
+ grid-column: 1;
+ grid-row: 1;
+}
+
+body[data-view="add"] .options-panel {
+ grid-column: 2;
+ grid-row: 1;
+}
+
+body[data-view="calendar"] .calendar-panel,
+body[data-view="todo"] .dashboard,
+body[data-view="todo"] .task-panel {
+ grid-column: 1;
+}
+
+body[data-view="todo"] .dashboard {
+ grid-row: 1;
+}
+
+body[data-view="todo"] .task-panel {
+ grid-row: 2;
+}
+
+.section-heading {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 12px;
+ margin-bottom: 14px;
+}
+
+.section-heading span,
+.section-heading p,
+.section-heading a {
+ color: var(--muted);
+ font-size: 13px;
+}
+
+form,
+.form-grid,
+.filters {
+ display: grid;
+ gap: 12px;
+}
+
+.form-grid {
+ grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.filters {
+ grid-template-columns: minmax(210px, 1.3fr) repeat(3, minmax(150px, 1fr));
+ margin-bottom: 14px;
+}
+
+label,
+.collab-box {
+ display: grid;
+ gap: 6px;
+}
+
+label span,
+.collab-box > span {
+ color: var(--muted);
+ font-size: 13px;
+ font-weight: 700;
+}
+
+input,
+select,
+textarea {
+ width: 100%;
+ border: 1px solid var(--line);
+ border-radius: 8px;
+ background: rgba(255, 255, 255, 0.72);
+ color: var(--ink);
+ min-height: 42px;
+ padding: 10px 12px;
+ outline: none;
+}
+
+textarea {
+ resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+ border-color: var(--accent);
+ box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.choice-row {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 8px;
+ min-height: 34px;
+}
+
+.choice-row label {
+ display: inline-flex;
+ align-items: center;
+ gap: 6px;
+ border: 1px solid var(--line);
+ border-radius: 999px;
+ padding: 6px 10px;
+ color: var(--ink);
+ background: rgba(255, 255, 255, 0.72);
+}
+
+.choice-row input {
+ width: 16px;
+ min-height: 16px;
+ padding: 0;
+}
+
+.metric-grid {
+ display: grid;
+ grid-template-columns: repeat(4, minmax(0, 1fr));
+ gap: 8px;
+ margin-bottom: 16px;
+}
+
+.metric-grid article {
+ border: 1px solid var(--line);
+ border-radius: 8px;
+ padding: 12px;
+ background: rgba(255, 255, 255, 0.64);
+}
+
+.metric-grid strong {
+ display: block;
+ font-size: 26px;
+ line-height: 1;
+}
+
+.metric-grid span {
+ display: block;
+ margin-top: 7px;
+ color: var(--muted);
+ font-size: 13px;
+}
+
+.charts {
+ display: grid;
+ grid-template-columns: repeat(2, minmax(0, 1fr));
+ gap: 18px;
+}
+
+.export-range {
+ display: grid;
+ grid-template-columns: minmax(220px, 1fr) 160px 160px auto;
+ gap: 12px;
+ align-items: end;
+ margin-top: 18px;
+ padding-top: 16px;
+ border-top: 1px solid var(--line);
+}
+
+.export-range p {
+ color: var(--muted);
+ font-size: 13px;
+ margin-top: 5px;
+}
+
+.export-actions {
+ display: flex;
+ gap: 8px;
+}
+
+.export-actions button {
+ min-height: 42px;
+ border: 1px solid var(--accent);
+ border-radius: 8px;
+ background: var(--accent);
+ color: white;
+ padding: 0 13px;
+ font-weight: 740;
+}
+
+.export-actions button + button {
+ background: white;
+ color: var(--accent);
+}
+
+.bar-list {
+ display: grid;
+ gap: 8px;
+}
+
+.bar-row {
+ display: grid;
+ grid-template-columns: minmax(92px, 140px) minmax(0, 1fr) 34px;
+ gap: 8px;
+ align-items: center;
+ color: var(--muted);
+ font-size: 13px;
+}
+
+.bar-track {
+ height: 9px;
+ border-radius: 999px;
+ background: var(--accent-soft);
+ overflow: hidden;
+}
+
+.bar-fill {
+ height: 100%;
+ background: var(--accent);
+}
+
+.task-list {
+ display: grid;
+ gap: 10px;
+}
+
+.task-card {
+ display: grid;
+ grid-template-columns: 28px minmax(0, 1fr) auto;
+ gap: 12px;
+ border: 1px solid var(--line);
+ border-radius: 8px;
+ padding: 12px;
+ background: rgba(255, 255, 255, 0.7);
+}
+
+.task-card.done,
+.task-card-done {
+ background: rgba(232, 242, 255, 0.72);
+ opacity: 0.75;
+}
+.task-card-done .task-title {
+ text-decoration: line-through;
+ color: var(--muted);
+}
+
+.task-card input[type="checkbox"] {
+ width: 20px;
+ min-height: 20px;
+ margin-top: 2px;
+}
+
+.task-title {
+ font-weight: 750;
+ line-height: 1.35;
+}
+
+.task-title.done {
+ text-decoration: line-through;
+ color: var(--muted);
+}
+
+/* 过期任务高亮警告样式 */
+.task-card.overdue {
+ border-color: rgba(255, 59, 48, 0.4);
+ background: rgba(255, 59, 48, 0.04);
+}
+.task-card.overdue .task-title {
+ color: var(--danger);
+}
+.task-card.overdue .tag.date {
+ color: var(--danger);
+ background: rgba(255, 59, 48, 0.1);
+ border-color: rgba(255, 59, 48, 0.2);
+}
+
+.task-meta {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 7px;
+ margin-top: 9px;
+}
+
+.tag {
+ display: inline-flex;
+ align-items: center;
+ min-height: 25px;
+ border-radius: 999px;
+ padding: 3px 9px;
+ background: #fff;
+ border: 1px solid var(--line);
+ color: var(--muted);
+ font-size: 12px;
+}
+
+.tag.urgent {
+ color: var(--danger);
+ border-color: #efc6c6;
+}
+
+.tag.important {
+ color: var(--warning);
+ border-color: #f1d3ab;
+}
+
+.task-note {
+ margin-top: 10px;
+ color: var(--muted);
+ font-size: 13px;
+ line-height: 1.45;
+ white-space: pre-wrap;
+}
+
+.task-actions {
+ display: flex;
+ gap: 8px;
+ align-items: start;
+}
+
+.empty-state {
+ border: 1px dashed var(--line);
+ border-radius: 8px;
+ color: var(--muted);
+ padding: 26px;
+ text-align: center;
+}
+
+.calendar-heading {
+ align-items: start;
+}
+
+.calendar-actions {
+ display: flex;
+ gap: 8px;
+}
+
+.calendar-actions button {
+ min-width: 42px;
+ padding: 0 12px;
+ font-weight: 700;
+}
+
+.calendar-weekdays,
+.calendar-grid {
+ display: grid;
+ grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.calendar-weekdays {
+ margin-bottom: 8px;
+ color: var(--muted);
+ font-size: 12px;
+ font-weight: 700;
+ text-align: center;
+}
+
+.calendar-grid {
+ border: 1px solid var(--line);
+ border-radius: 8px;
+ overflow: hidden;
+ background: rgba(255, 255, 255, 0.65);
+ grid-auto-rows: minmax(100px, auto);
+}
+
+.calendar-day {
+ min-height: 100px;
+ border-right: 1px solid var(--line);
+ border-bottom: 1px solid var(--line);
+ padding: 10px;
+ display: grid;
+ align-content: start;
+ gap: 8px;
+}
+
+.calendar-day:nth-child(7n) {
+ border-right: 0;
+}
+
+.calendar-day:nth-last-child(-n + 7) {
+ border-bottom: 0;
+}
+
+.calendar-day.outside {
+ color: rgba(60, 60, 67, 0.35);
+ background: rgba(247, 247, 249, 0.58);
+}
+
+.calendar-day.today {
+ box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.calendar-day.selected {
+ background: rgba(0, 122, 255, 0.08);
+ box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.18);
+}
+
+.day-number {
+ width: 28px;
+ height: 28px;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ border-radius: 999px;
+ font-size: 13px;
+ font-weight: 800;
+}
+
+.cal-dots {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 5px;
+}
+
+.cal-dot {
+ width: 10px;
+ height: 10px;
+ border-radius: 50%;
+ display: inline-block;
+}
+
+.calendar-detail-list .task-card {
+ margin-bottom: 12px;
+}
+
+.calendar-day.today .day-number {
+ background: var(--accent);
+ color: white;
+}
+
+.calendar-pill {
+ min-height: 23px;
+ border-radius: 6px;
+ padding: 4px 6px;
+ background: var(--accent-soft);
+ color: var(--accent-strong);
+ font-size: 12px;
+ line-height: 1.2;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+}
+
+.calendar-pill.urgent {
+ color: var(--danger);
+ background: #fff1f1;
+}
+
+.calendar-pill.important {
+ color: var(--warning);
+ background: #fff7eb;
+}
+
+.calendar-more {
+ color: var(--muted);
+ font-size: 12px;
+}
+
+.calendar-footnote {
+ display: flex;
+ gap: 10px;
+ flex-wrap: wrap;
+ margin-top: 12px;
+ color: var(--muted);
+ font-size: 13px;
+}
+
+.calendar-footnote span {
+ border: 1px solid var(--line);
+ border-radius: 999px;
+ padding: 5px 10px;
+ background: rgba(255, 255, 255, 0.62);
+}
+
+.option-editor {
+ display: grid;
+ gap: 14px;
+}
+
+.option-group {
+ display: grid;
+ gap: 8px;
+ padding-bottom: 12px;
+ border-bottom: 1px solid var(--line);
+}
+
+.option-group:last-child {
+ padding-bottom: 0;
+ border-bottom: 0;
+}
+
+.option-chip-list {
+ display: flex;
+ gap: 7px;
+ flex-wrap: wrap;
+}
+
+.option-chip {
+ min-height: 32px;
+ border: 1px solid var(--line);
+ border-radius: 999px;
+ background: rgba(255, 255, 255, 0.72);
+ color: var(--ink);
+ display: inline-flex;
+ align-items: center;
+ gap: 7px;
+ padding: 4px 9px 4px 11px;
+}
+
+.option-chip strong {
+ color: var(--muted);
+ font-size: 15px;
+}
+
+.option-add-form {
+ display: grid;
+ grid-template-columns: minmax(0, 1fr) auto;
+ gap: 8px;
+}
+
+.option-add-form button {
+ border: 1px solid var(--accent);
+ border-radius: 8px;
+ background: var(--accent);
+ color: white;
+ padding: 0 13px;
+}
+
+.day-dialog {
+ position: fixed;
+ width: min(620px, calc(100% - 28px));
+ border: 1px solid var(--line);
+ border-radius: 14px;
+ padding: 18px;
+ background: rgba(255, 255, 255, 0.94);
+ color: var(--ink);
+ box-shadow: var(--shadow);
+ backdrop-filter: blur(18px);
+ max-height: min(85vh, 760px);
+ overflow-y: auto;
+ z-index: 10005;
+}
+
+.day-dialog::backdrop {
+ background: rgba(0, 0, 0, 0.35);
+ backdrop-filter: blur(2px);
+}
+
+.day-dialog .dialog-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: flex-start;
+ gap: 12px;
+ margin-bottom: 18px;
+}
+
+.day-dialog-title {
+ margin: 0 0 6px;
+ font-size: 20px;
+ line-height: 1.2;
+ font-weight: 800;
+}
+
+.day-dialog-subtitle {
+ margin: 0;
+ color: var(--muted);
+ font-size: 13px;
+}
+
+.day-task-list {
+ display: grid;
+ gap: 10px;
+}
+
+.day-task-card {
+ border: 1px solid var(--line);
+ border-radius: 12px;
+ background: rgba(255, 255, 255, 0.92);
+ padding: 14px;
+ display: grid;
+ gap: 10px;
+ transition: transform 240ms ease, opacity 240ms ease, max-height 240ms ease, margin 240ms ease, padding 240ms ease;
+ overflow: hidden;
+}
+
+.day-task-card.completing {
+ transform: translateY(18px);
+ opacity: 0;
+ max-height: 0;
+ margin: 0;
+ padding-top: 0;
+ padding-bottom: 0;
+ border-color: transparent;
+}
+
+.day-task-card label {
+ display: flex;
+ align-items: flex-start;
+ gap: 12px;
+}
+
+.day-task-card input[type="checkbox"] {
+ width: 22px;
+ height: 22px;
+ margin-top: 4px;
+}
+
+.widget-task {
+ border: 1px solid var(--line);
+ border-radius: 8px;
+ background: rgba(255, 255, 255, 0.72);
+ padding: 12px;
+}
+
+.day-task-card strong,
+.widget-task strong {
+ display: block;
+ line-height: 1.35;
+}
+
+.widget-body {
+ min-height: 100vh;
+}
+
+.widget-shell {
+ width: min(480px, 100%);
+ margin: 0 auto;
+ padding: 22px;
+ display: grid;
+ gap: 16px;
+}
+
+.widget-shell header {
+ padding: 8px 2px;
+}
+
+.widget-shell #widgetDate {
+ color: var(--muted);
+ margin-top: 6px;
+}
+
+.widget-tasks {
+ display: grid;
+ gap: 10px;
+}
+
+.widget-task span {
+ display: block;
+ color: var(--muted);
+ font-size: 13px;
+ margin-top: 7px;
+}
+
+@media (max-width: 900px) {
+ .app-shell {
+ padding: 14px;
+ padding-bottom: 92px;
+ }
+
+ .topbar {
+ align-items: flex-start;
+ }
+
+ h1 {
+ font-size: 28px;
+ }
+
+ .layout,
+ .dashboard,
+ .options-panel,
+ .calendar-panel,
+ .task-panel {
+ display: grid;
+ grid-template-columns: 1fr;
+ grid-column: auto;
+ }
+
+ .composer {
+ position: static;
+ }
+
+ .options-panel {
+ position: static;
+ }
+
+ .filters,
+ .charts,
+ .export-range,
+ .metric-grid {
+ grid-template-columns: 1fr 1fr;
+ }
+
+ .filters label:first-child {
+ grid-column: 1 / -1;
+ }
+
+ .bulk-actions {
+ position: fixed;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ z-index: 20;
+ padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+ background: rgba(255, 255, 255, 0.94);
+ backdrop-filter: blur(18px);
+ border-top: 1px solid var(--line);
+ justify-content: center;
+ }
+
+ .bulk-actions button {
+ flex: 1;
+ min-width: 0;
+ }
+}
+
+@media (max-width: 560px) {
+ .topbar {
+ display: flex;
+ flex-wrap: nowrap !important;
+ overflow-x: auto;
+ -webkit-overflow-scrolling: touch;
+ align-items: center;
+ scrollbar-width: none;
+ }
+ .topbar::-webkit-scrollbar { display: none; }
+
+ .form-grid,
+ .filters,
+ .charts,
+ .export-range,
+ .metric-grid {
+ grid-template-columns: 1fr;
+ }
+
+ .export-actions {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ }
+
+ .task-card {
+ grid-template-columns: 26px minmax(0, 1fr);
+ }
+
+ .task-actions {
+ grid-column: 2;
+ }
+
+ .calendar-day {
+ min-height: 88px;
+ padding: 6px;
+ }
+
+ .calendar-pill {
+ font-size: 11px;
+ padding: 3px 5px;
+ }
+}
+ 
+
+/* ── Additional Supplements ── */
+.topbar-brand { display:flex; align-items:center; gap:10px; flex-shrink: 0; }
+.topbar-brand img { width:36px; height:36px; border-radius:9px; }
+
+/* view-tabs changed to 4 columns */
+.view-tabs { grid-template-columns: repeat(4, minmax(0,1fr)); }
+
+/* select-row */
+.select-row { display:flex; gap:8px; align-items:center; }
+.select-row select { flex:1; }
+.btn-manage {
+ flex-shrink:0; min-height:42px; padding:0 12px;
+ border:1px solid var(--line); border-radius:8px;
+ background:#fff; color:var(--accent);
+ font-size:13px; font-weight:700; white-space:nowrap; cursor:pointer;
+}
+
+/* Statistics view */
+.stats-panel { grid-column:1; }
+.stats-detail-grid { display:grid; grid-template-columns:1fr; gap:18px; margin-top:18px; }
+.stat-card { border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:rgba(255,255,255,0.64); }
+.stat-value { display:block; font-size:20px; font-weight:800; line-height:1; }
+.stat-label { display:block; margin-top:4px; color:var(--muted); font-size:12px; }
+.stats-section-title { grid-column: 1 / -1; font-size: 14px; font-weight: 700; color: var(--muted); margin-top: 4px; margin-bottom: 2px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px; }
+.card-header { margin-bottom:12px; }
+.card-title { font-size:15px; font-weight:700; }
+@media(min-width: 901px) {
+ .stats-detail-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Calendar cell height */
+.calendar-day { min-height:80px; }
+.cal-dots { display:flex; flex-wrap:wrap; gap:3px; margin-top:2px; }
+.cal-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+/* Options management drawer */
+.opt-drawer-mask { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:100; }
+.opt-drawer {
+ position:fixed; bottom:0; left:0; right:0;
+ background:#fff; border-radius:16px 16px 0 0;
+ padding:20px; z-index:101; max-height:70vh;
+ display:none; flex-direction:column; gap:12px;
+ box-shadow:0 -8px 32px rgba(0,0,0,0.12);
+}
+.opt-drawer-title { font-size:16px; font-weight:700; display:flex; justify-content:space-between; align-items:center; }
+.opt-list { overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:8px; }
+.opt-item { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,0.72); }
+.opt-item span { flex:1; font-size:14px; }
+.opt-add-row { display:flex; gap:8px; }
+.opt-add-row input { flex:1; padding:8px 12px; border:1px solid var(--line); border-radius:8px; font-size:14px; }
+.opt-add-btn { border:1px solid var(--accent); border-radius:8px; background:var(--accent); color:white; padding:0 14px; font-weight:700; cursor:pointer; }
+
+/* Task card */
+.task-card { grid-template-columns: minmax(0,1fr) auto; }
+.task-card button { min-height:34px; padding:0 12px; font-size:13px; }
+.task-note { margin-top:10px; color:var(--muted); font-size:13px; line-height:1.45; white-space:pre-wrap; }
+
+@media(max-width:900px){
+ .app-shell { padding:14px; padding-bottom:80px; }
+ h1 { font-size:26px; }
+ .layout,.metric-grid,.charts { grid-template-columns:1fr; }
+ .form-grid { grid-template-columns:1fr 1fr; }
+ .composer { position:static; }
+}
+@media(max-width:560px){
+ .form-grid { grid-template-columns:1fr; }
+ .metric-grid { grid-template-columns:1fr 1fr; }
+}
+
+.muted-label { font-size:13px; font-weight:700; color:var(--muted); }
+.grid-6gap { display:grid; gap:6px; }
+.close-btn { background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted); }
+.form-select { min-height:34px; padding:4px 10px; font-size:13px; }
+.empty-msg { color:var(--muted); font-size:14px; text-align:center; padding:12px; }
+.priority-label { display:inline-block; padding:2px 6px; border-radius:4px; font-size:12px; }
+.priority-label.urgent { background:rgba(255,59,48,0.2); color:#dc3545; }
+.priority-label.important { background:rgba(255,204,0,0.2); color:#b76b18; }
+.priority-label.normal { background:rgba(60,60,67,0.1); color:var(--muted); }
+
+.account-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid var(--line);
+}
+
+.login-account-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+.login-account-item {
+  padding: 10px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.login-account-item:hover {
+  border-color: var(--accent);
+  background: rgba(0, 122, 255, 0.05);
+}
+
+.login-account-item.active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+
+.account-list {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+}
+
+.account-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.account-avatar.active {
+  border-color: var(--accent);
+}
+
+.account-avatar:hover {
+  border-color: rgba(0, 122, 255, 0.5);
+}
+
+.add-account-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.add-account-btn:hover {
+  background: rgba(0, 122, 255, 0.8);
+}
+
+.account-settings-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  color: #666;
+  border: 1px solid var(--line);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.account-settings-btn:hover {
+  background: #e8e8e8;
+}
+
+/* Settings modal */
+.settings-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 100;
+  backdrop-filter: blur(2px);
+}
+
+.settings-modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: min(400px, calc(100% - 24px));
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--line);
+}
+
+.settings-panel h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--ink);
+}
+
+.settings-form {
+  display: grid;
+  gap: 14px;
+}
+
+.form-field {
+  display: grid;
+  gap: 6px;
+}
+
+.form-field label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.form-field input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.form-field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.settings-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.settings-actions button {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.settings-actions .cancel-btn {
+  background: #f5f5f5;
+  color: var(--muted);
+}
+
+.settings-actions .save-btn {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.settings-actions .save-btn:hover {
+  background: rgba(0, 122, 255, 0.9);
+}
+
+/* Login Dialog Styles */
+.login-dialog {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-dialog.show {
+  display: flex;
+}
+
+.login-content {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.login-content h2 {
+  margin: 0 0 20px 0;
+  text-align: center;
+  color: var(--ink);
+}
+
+.login-form {
+  display: grid;
+  gap: 16px;
+}
+
+.login-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.login-form label span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.login-form input,
+.login-form select {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.login-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.login-actions .primary-button {
+  flex: 1;
+}
+
+.login-actions .icon-button {
+  flex: 1;
+  border: 1px solid var(--line);
+  background: white;
+  color: var(--muted);
+}
+
+.login-actions .icon-button:hover {
+  background: var(--line);
+}
+
+/* Layout repair */
+.full-row { grid-column: 1 / -1; }
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.check-row input[type="checkbox"] {
+  width: 18px;
+  min-height: 18px;
+  padding: 0;
+}
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  flex-wrap: wrap;
+  background: rgba(251, 251, 253, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  backdrop-filter: blur(18px);
+}
+.topbar-brand h1 { font-size: 20px; line-height: 1.15; }
+.topbar-actions { flex-wrap: wrap; justify-content: flex-end; }
+.layout { grid-template-columns: minmax(360px, 520px) minmax(0, 1fr); }
+body[data-view="add"] .layout,
+body[data-view="calendar"] .layout,
+body[data-view="todo"] .layout,
+body[data-view="stats"] .layout { grid-template-columns: minmax(0, 1fr); }
+body[data-view="add"] .composer,
+body[data-view="calendar"] .calendar-panel,
+body[data-view="todo"] .task-panel,
+body[data-view="stats"] .stats-panel {
+  grid-column: 1;
+  grid-row: 1;
+}
+.calendar-grid { grid-auto-rows: minmax(108px, auto); }
+.calendar-day { min-width: 0; }
+.task-card { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
+.task-actions { flex-wrap: wrap; justify-content: flex-end; }
+.completed-section { margin-top: 16px; }
+.completed-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+#completedArrow { transition: transform 0.2s; }
+#completedCount { font-size: 12px; font-weight: 400; }
+@media (max-width: 900px) {
+  .topbar { position: static; align-items: center; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .topbar::-webkit-scrollbar { display: none; }
+  .topbar-actions { justify-content: flex-start; flex-wrap: nowrap; }
+  .view-tabs { position: sticky; top: 0; z-index: 25; }
+  .layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .app-shell { padding: 12px; padding-bottom: 86px; }
+  .topbar-actions > .sync-button,
+  .topbar-actions > .export-link { flex: 0 0 auto; }
+  .view-tabs { overflow-x: auto; grid-template-columns: repeat(4, minmax(96px, 1fr)); }
+  .calendar-grid { grid-auto-rows: minmax(72px, auto); }
+  .calendar-pill { display: none; }
+  .cal-dot { display: inline-block; }
+  .task-card { grid-template-columns: 1fr; }
+  .task-actions { justify-content: stretch; }
+  .task-actions button { flex: 1; }
+}
+
+/* --- 会议相关的补充样式 --- */
+.calendar-day.has-meeting {
+  background-color: rgba(175, 82, 222, 0.08);
+}
+/* 苹果迷你分段开关风格 */
+.type-segmented-control { display: inline-flex; background: rgba(118, 118, 128, 0.12); padding: 2.5px; border-radius: 8px; margin-bottom: 18px; }
+.type-segmented-control label { flex: none; position: relative; cursor: pointer; margin: 0; }
+.type-segmented-control input { position: absolute; opacity: 0; pointer-events: none; }
+.type-segmented-control span { display: block; text-align: center; padding: 5px 16px; font-size: 13px; font-weight: 600; color: var(--muted); border-radius: 6px; transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1); }
+.type-segmented-control input:checked + span { background: white; color: var(--ink); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04); }
+
+.meeting-notification-list { display: grid; gap: 10px; margin-bottom: 16px; }
+.meeting-banner {
+  display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px;
+  border: 1px solid var(--line); border-radius: 8px; padding: 12px;
+  background: rgba(255, 255, 255, 0.7); align-items: start;
+}
+.meeting-banner-icon { font-size: 16px; display: flex; justify-content: center; margin-top: 2px; }
+.meeting-banner-info { min-width: 0; }
+.meeting-banner-title { font-weight: 750; line-height: 1.35; color: var(--ink); }
+.meeting-banner-meta { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+.meeting-banner-meta span {
+  display: inline-flex; align-items: center; min-height: 25px; border-radius: 999px;
+  padding: 3px 9px; background: #fff; border: 1px solid var(--line);
+  color: var(--muted); font-size: 12px;
+}
+.meeting-banner-meta .highlight { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* --- 手机端及 PWA 桌面应用极致适配 --- */
+.stats-control-bar { display: grid; grid-template-columns: auto 1fr auto auto; gap: 16px; margin-bottom: 16px; align-items: center; }
+.stats-filter-group { display: flex; gap: 8px; align-items: center; }
+.stats-filter-item { display: flex; align-items: center; gap: 8px; justify-self: center; }
+.stats-filter-action { justify-self: end; }
+
+@media (max-width: 900px) {
+  .type-segmented-control { display: flex; width: 100%; }
+  .type-segmented-control label { flex: 1; }
+  .stats-control-bar { grid-template-columns: 1fr; gap: 12px; }
+  .stats-filter-group { flex-wrap: wrap; justify-content: space-between; }
+  .stats-filter-item { justify-self: stretch; width: 100%; }
+  .stats-filter-item select { flex: 1; }
+  .stats-filter-action { justify-self: stretch; }
+  .stats-filter-action button { width: 100%; min-height: 44px; }
+}
+
+@media (max-width: 560px) {
+  .app-shell { 
+    padding: 10px; 
+    /* iOS 安全区适配，防止底部被小黑条遮挡 */
+    padding-bottom: max(86px, env(safe-area-inset-bottom) + 20px); 
+  }
+  .topbar-actions > button, .topbar-actions > .sync-button, .topbar-actions > .export-link { flex: 0 0 auto; min-width: 0; text-align: center; }
+  /* 让顶部四个Tab不会左右滑动，均匀排布且容易触控 */
+  .view-tabs { grid-template-columns: repeat(4, 1fr); padding: 2px; gap: 2px; }
+  .view-tabs button { font-size: 13px; min-height: 40px; padding: 0; white-space: nowrap; }
+  /* 修复任务和会议卡片堆叠造成的UI错位 */
+  .task-card { grid-template-columns: 1fr; gap: 10px; padding: 10px; }
+  .task-actions { grid-column: 1 / -1; display: flex; gap: 6px; }
+  .meeting-banner { grid-template-columns: 24px minmax(0, 1fr); gap: 10px; padding: 10px; }
+  .meeting-banner-icon { font-size: 14px; margin-top: 1px; }
+  .meeting-banner-title { font-size: 15px; }
+  .meeting-banner-meta span { font-size: 11px; padding: 2px 6px; }
+  /* 统计页面紧凑化排列 */
+  .metric-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+}
+ .toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 24px;
+  padding: 12px 24px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  transition: opacity .3s, transform .3s;
+  font-weight: 600;
+  z-index: 9999;
+}
+.toast.success { background: var(--accent-soft); color: var(--accent); }
+.toast.error { background: #f8d7da; color: #842029; }
+.spinner {
+  width: 1em; height: 1em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block; vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+ <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+ <link rel="mask-icon" href="./mask-icon.png" color="#007aff">
+ <meta name="apple-mobile-web-app-capable" content="yes">
+ <meta name="mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-title" content="EV Planner">
+ <meta name="application-name" content="EV Planner">
+ <meta name="apple-mobile-web-app-status-bar-style" content="default">
+</head>
+<body data-view="add">
+<!-- Login Dialog -->
+<div id="loginDialog" class="login-dialog">
+  <div class="login-content">
+    <h2>Login</h2>
+      <div class="login-form">
+        <label>
+          <span>Account</span>
+          <input type="text" id="loginUsername" list="loginAccountSuggestions" placeholder="Enter account name" autocomplete="username">
+          <datalist id="loginAccountSuggestions"></datalist>
+        </label>
+      <label>
+        <span>Password</span>
+        <input type="password" id="loginPassword" placeholder="Enter password">
+      </label>
+      <div class="login-actions">
+        <button onclick="login()" class="primary-button">Login</button>
+        <button onclick="showAddUserDialog()" class="icon-button">Add User</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add User Dialog -->
+<div id="addUserDialog" class="login-dialog">
+  <div class="login-content">
+    <h2>Add New User</h2>
+    <div class="login-form">
+      <label>
+        <span>Username</span>
+        <input type="text" id="newUsername" placeholder="Enter username">
+      </label>
+      <label>
+        <span>Password</span>
+        <input type="password" id="newPassword" placeholder="Enter password">
+      </label>
+      <div class="login-actions">
+        <button onclick="addNewUser()" class="primary-button">Add User</button>
+        <button onclick="hideAddUserDialog()" class="icon-button">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Dialog -->
+<div id="changePasswordDialog" class="login-dialog">
+  <div class="login-content">
+    <h2>Change Password</h2>
+    <div class="login-form">
+      <label>
+        <span>Current Password</span>
+        <input type="password" id="currentPassword" placeholder="Enter current password">
+      </label>
+      <label>
+        <span>New Password</span>
+        <input type="password" id="newPasswordInput" placeholder="Enter new password">
+      </label>
+      <label>
+        <span>Confirm New Password</span>
+        <input type="password" id="confirmPassword" placeholder="Confirm new password">
+      </label>
+      <div class="login-actions">
+        <button onclick="changePassword()" class="primary-button">Change Password</button>
+        <button onclick="hideChangePasswordDialog()" class="icon-button">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Change Avatar Dialog -->
+<div id="changeAvatarDialog" class="login-dialog">
+  <div class="login-content">
+    <h2>Change Avatar</h2>
+    <div class="login-form">
+      <label>
+        <span>Avatar Text</span>
+        <input type="text" id="avatarText" placeholder="Enter avatar text (e.g., initials)">
+      </label>
+      <div class="login-actions">
+        <button onclick="changeAvatar()" class="primary-button">Change Avatar</button>
+        <button onclick="hideChangeAvatarDialog()" class="icon-button">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="app-shell" id="appShell" style="display: none;">
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img src="./logo.png" alt="EV">
+      <div>
+        <p class="eyebrow">EV Work Planner</p>
+        <h1>Work Planner</h1>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span id="currentUserDisplay" class="current-user"></span>
+      <button onclick="showChangePasswordDialog()" class="icon-button" title="Change Password" aria-label="Change Password">🔑</button>
+      <button onclick="showChangeAvatarDialog()" class="icon-button" title="Change Avatar" aria-label="Change Avatar">👤</button>
+      <button onclick="logout()" class="icon-button" title="Logout" aria-label="Logout">🚪</button>
+      <button class="sync-button" onclick="refreshData()"><span>↻</span><strong>Sync</strong></button>
+      <button class="export-link" onclick="exportToExcel()">Export</button>
+    </div>
+  </header>
+
+  <nav class="view-tabs" aria-label="Main views">
+    <button type="button" data-view-target="add" class="active">Add Task</button>
+    <button type="button" data-view-target="calendar">Calendar</button>
+    <button type="button" data-view-target="todo">To-Do</button>
+    <button type="button" data-view-target="stats">Stats</button>
+  </nav>
+
+  <main class="layout">
+    <section class="panel composer" data-view-panel="add">
+      <div class="section-heading">
+        <div>
+          <h2>Add New Item</h2>
+          <p>Create a task or schedule a meeting.</p>
+        </div>
+      </div>
+      <div class="type-segmented-control">
+        <label><input type="radio" name="itemType" value="task" checked onchange="toggleItemType()"> <span>📝 Task</span></label>
+        <label><input type="radio" name="itemType" value="meeting" onchange="toggleItemType()"> <span>🤝 Meeting</span></label>
+      </div>
+      <form id="taskForm" onsubmit="addTask(event)" autocomplete="off">
+        <label>
+          <span id="titleLabel">Task Content</span>
+          <input type="text" id="title" placeholder="Enter task content" required>
+        </label>
+        <div class="form-grid">
+          <label>
+            <span>Department</span>
+            <div class="select-row">
+              <select id="department"></select>
+              <button type="button" class="btn-manage" onclick="openOptDrawer('departments','department','Department')">Manage</button>
+            </div>
+          </label>
+          <label>
+            <span>Brand</span>
+            <div class="select-row">
+              <select id="brand"></select>
+              <button type="button" class="btn-manage" onclick="openOptDrawer('brands','brand','Brand')">Manage</button>
+            </div>
+          </label>
+          <label class="task-only-row">
+            <span>Type</span>
+            <div class="select-row">
+              <select id="type"></select>
+              <button type="button" class="btn-manage" onclick="openOptDrawer('taskTypes','type','Type')">Manage</button>
+            </div>
+          </label>
+          <label class="task-only-row">
+            <span>Priority</span>
+            <div class="select-row">
+              <select id="priority"></select>
+              <button type="button" class="btn-manage" onclick="openOptDrawer('priorities','priority','Priority')">Manage</button>
+            </div>
+          </label>
+          <label class="full-row" style="cursor: pointer;" onclick="try{document.getElementById('dueDate').showPicker()}catch(e){}">
+            <span id="dateLabel">Due Date</span>
+            <input type="date" id="dueDate" style="cursor: pointer;" onclick="event.stopPropagation(); try{this.showPicker()}catch(e){}">
+          </label>
+          <label class="meeting-time-row" style="display:none; cursor: pointer;" onclick="try{document.getElementById('startTime').showPicker()}catch(e){}">
+            <span>Start Time</span>
+            <input type="time" id="startTime" style="cursor: pointer;" onclick="event.stopPropagation(); try{this.showPicker()}catch(e){}">
+          </label>
+          <label class="check-row full-row task-only-row">
+            <input type="checkbox" id="isRecurring" onchange="toggleRecurring()">
+            <span>Recurring Task</span>
+          </label>
+          <label id="recurringPeriodLabel" class="full-row" style="display:none">
+            <span>Repeat Cycle</span>
+            <select id="recurringPeriod">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="biweekly">Bi-weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </label>
+        </div>
+        <label>
+          <span>Notes</span>
+          <textarea id="note" rows="3" placeholder="Task notes, process records, year-end summary materials"></textarea>
+        </label>
+        <button type="submit" class="primary-button"><span class="spinner" style="display:none;"></span> Add Task</button>
+      </form>
+    </section>
+
+    <section class="panel calendar-panel" data-view-panel="calendar">
+      <div id="meetingNotifications" class="meeting-notification-list" style="display:none;"></div>
+      <div class="section-heading calendar-heading">
+        <div>
+          <h2 id="calendarTitle">Calendar</h2>
+          <p>Click a date to view uncompleted tasks.</p>
+        </div>
+        <div class="calendar-actions">
+          <button type="button" onclick="prevMonth()" aria-label="Previous month">‹</button>
+          <button type="button" onclick="today()">Today</button>
+          <button type="button" onclick="nextMonth()" aria-label="Next month">›</button>
+        </div>
+      </div>
+      <div class="calendar-weekdays">
+        <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+      </div>
+      <div id="calendar" class="calendar-grid"></div>
+    </section>
+
+    <section class="panel task-panel" data-view-panel="todo">
+      <div class="section-heading">
+        <div>
+          <h2>Incomplete Tasks</h2>
+          <p id="taskCount">0 items</p>
+        </div>
+      </div>
+      <div id="taskList" class="task-list"></div>
+      <div id="completedSection" class="completed-section">
+        <button id="completedToggle" class="completed-toggle" onclick="toggleCompletedSection()">
+          <span id="completedArrow">&#9654;</span>
+          <span>Completed Tasks</span>
+          <span id="completedCount"></span>
+        </button>
+        <div id="completedList" class="task-list" style="display:none"></div>
+      </div>
+    </section>
+
+    <section class="panel stats-panel" data-view-panel="stats">
+      <div class="section-heading">
+        <div>
+          <h2>Completion Statistics</h2>
+          <p>Real-time task overview.</p>
+        </div>
+      </div>
+      <div class="metric-grid" id="statsOverview"></div>
+      <div class="stats-detail-grid" id="statsDetail"></div>
+    </section>
+  </main>
+</div>
+
+<!-- Options management drawer -->
+<div class="opt-drawer-mask" id="optMask" onclick="closeOptDrawer()"></div>
+<div class="opt-drawer" id="optDrawer">
+ <div class="opt-drawer-title">
+ <span id="optDrawerTitle"></span>
+ <button onclick="closeOptDrawer()" class="close-btn">✕</button>
+ </div>
+ <div class="opt-list" id="optList"></div>
+ <div class="opt-add-row">
+ <input id="optNewVal" placeholder="Enter new option…" onkeydown="if(event.key==='Enter')saveNewOpt()">
+ <button class="opt-add-btn" onclick="saveNewOpt()">Add</button>
+ </div>
+</div>
+
+<!-- Edit TaskDrawer -->
+<div class="opt-drawer-mask" id="editDrawerMask" onclick="closeEditDrawer()"></div>
+<div class="opt-drawer" id="editDrawer" style="max-height:85vh">
+ <div class="opt-drawer-title">
+ <span>Edit Task</span>
+ <button onclick="closeEditDrawer()" class="close-btn">✕</button>
+ </div>
+ <div class="opt-list" style="padding:4px 0 8px">
+ <div style="display:grid;gap:12px">
+ <label style="display:grid;gap:6px">
+ <span style="font-size:13px;font-weight:700;color:var(--muted)">Task Content</span>
+ <input id="editTitle" type="text" placeholder="Task Content">
+ </label>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+ <label style="display:grid;gap:6px">
+ <span style="font-size:13px;font-weight:700;color:var(--muted)">Department</span>
+ <select id="editDepartment"></select>
+ </label>
+ <label style="display:grid;gap:6px">
+ <span style="font-size:13px;font-weight:700;color:var(--muted)">Brand</span>
+ <select id="editBrand"></select>
+ </label>
+ <label id="editTypeRow" style="display:grid;gap:6px">
+ <span style="font-size:13px;font-weight:700;color:var(--muted)">Type</span>
+ <select id="editType"></select>
+ </label>
+ <label id="editPriorityRow" style="display:grid;gap:6px">
+ <span style="font-size:13px;font-weight:700;color:var(--muted)">Priority</span>
+ <select id="editPriority"></select>
+ </label>
+ </div>
+ <label style="display:grid;gap:6px;cursor:pointer;" onclick="try{document.getElementById('editDueDate').showPicker()}catch(e){}">
+ <span style="font-size:13px;font-weight:700;color:var(--muted)">Due Date</span>
+ <input id="editDueDate" type="date" style="cursor:pointer;" onclick="event.stopPropagation(); try{this.showPicker()}catch(e){}">
+ </label>
+ <label class="edit-meeting-time-row" style="display:none;gap:6px;cursor:pointer;" onclick="try{document.getElementById('editStartTime').showPicker()}catch(e){}">
+ <span style="font-size:13px;font-weight:700;color:var(--muted)">Start Time</span>
+ <input id="editStartTime" type="time" style="cursor:pointer;" onclick="event.stopPropagation(); try{this.showPicker()}catch(e){}">
+ </label>
+ <label id="editRecurringRow" style="grid-column:1/-1;display:flex;align-items:center;gap:10px">
+ <input type="checkbox" id="editIsRecurring" onchange="toggleEditRecurring()" style="width:18px;min-height:18px">
+ <span style="font-size:13px;font-weight:700;color:var(--muted)">Recurring Task</span>
+ </label>
+ <label id="editRecurringPeriodLabel" style="grid-column:1/-1;display:none;gap:6px">
+ <span style="font-size:13px;font-weight:700;color:var(--muted)">Repeat Cycle</span>
+ <select id="editRecurringPeriod">
+ <option value="daily">Daily</option>
+ <option value="weekly">Weekly</option>
+ <option value="biweekly">Bi-weekly</option>
+ <option value="monthly">Monthly</option>
+ </select>
+ </label>
+ <label style="display:grid;gap:6px">
+ <span style="font-size:13px;font-weight:700;color:var(--muted)">Notes</span>
+ <textarea id="editNote" rows="3" placeholder="Notes、process records…"></textarea>
+ </label>
+ </div>
+ </div>
+ <div class="opt-add-row" style="padding-top:12px">
+ <button onclick="closeEditDrawer()" style="flex:1;min-height:42px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--muted);font-weight:700;cursor:pointer">Cancel</button>
+ <button onclick="saveEditTask()" class="opt-add-btn" style="flex:2;min-height:42px"><span class="spinner" style="display:none;"></span> Save Changes</button>
+ </div>
+</div>
+
+ <dialog id="calendarDayDialog" class="day-dialog" aria-labelledby="calendarDetailTitle">
+ <div class="dialog-header">
+ <div>
+ <p id="calendarDetailTitle" class="day-dialog-title">Select a date to view uncompleted tasks for that day</p>
+ <p class="day-dialog-subtitle">Click background to close, checking completed tasks will auto-refresh.</p>
+ </div>
+ <button type="button" class="icon-button" onclick="closeDayDialog()" aria-label="Close">×</button>
+ </div>
+ <div id="calendarDayDialogTasks" class="day-task-list">
+ <div class="empty-state">
+ <div class="empty-state-icon">🗓️</div>
+ <p>Select a date to view uncompleted tasks for that day</p>
+ </div>
+ </div>
+ </dialog>
+
+<script type="module">
+ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+ import {
+ getAuth,
+ signInWithEmailAndPassword,
+ createUserWithEmailAndPassword,
+ signOut,
+ onAuthStateChanged,
+ updatePassword
+ } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+ import {
+ getFirestore,
+ collection,
+ doc,
+ getDoc,
+ getDocs,
+ query,
+ orderBy,
+ addDoc,
+ updateDoc,
+ deleteDoc,
+ setDoc,
+ Timestamp,
+ enableIndexedDbPersistence,
+ onSnapshot
+ } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+ import { store } from './store.js';
+ import { handleError } from './utils/errorHandler.js';
+ import { showToast } from './utils.js';
+
+ const firebaseConfig={
+ apiKey: "AIzaSyAckwQTB-KaPqKR_PNoRwi3j5T3TnscqKw",
+ authDomain: "work-list-e2878.firebaseapp.com",
+ projectId: "work-list-e2878",
+ storageBucket: "work-list-e2878.firebasestorage.app",
+ messagingSenderId: "240324907881",
+ appId: "1:240324907881:web:cadb1a4264beb1df03e3f8",
+ measurementId: "G-LGBPY32DDB"
+ };
+
+ const app=initializeApp(firebaseConfig);
+ const auth=getAuth(app);
+   const db = getFirestore(app);
+  try {
+    enableIndexedDbPersistence(db);
+  } catch (e) {
+    console.warn('[Firestore] Offline persistence error', e);
+  }
+
+ // 在 Firebase 初始化后导入依赖 api.js
+ const { fetchTasksPage, createTask, updateTask, deleteTask } = await import('./api.js');
+ 
+ function normalizeAccountName(value) {
+   return String(value || '').trim().toUpperCase();
+ }
+ 
+ // 仅用于登录下拉提示的历史记录
+ function getLoginHistory() { try { return JSON.parse(localStorage.getItem('loginHistory') || '[]'); } catch { return []; } }
+ function saveLoginHistory(username) { const hist = getLoginHistory(); const norm = normalizeAccountName(username); if(norm && !hist.includes(norm)){ hist.push(norm); localStorage.setItem('loginHistory', JSON.stringify(hist)); } }
+ 
+ let currentAccount = 'AAA'; // 默认占位，实际由 Firebase Auth 状态接管
+ globalThis.currentAccount = currentAccount;
+ 
+ function getAccountCollection(account, collectionName) {
+   if (account === 'AAA') return collectionName;
+   return `${collectionName}_${account}`;
+ }
+ 
+ function getAccountDoc(account, docName) {
+   if (account === 'AAA') return docName;
+   return `${docName}_${account}`;
+ }
+ 
+ // Enable offline persistence
+//  try {
+//  enableIndexedDbPersistence(db);
+//  } catch (err) {
+//  if (err.code !=='failed-precondition' && err.code !=='unimplemented') {
+//  console.error('Persistence initialization failed:', err);
+//  }
+//  }
+  // Persistence already enabled earlier (see lines 1915-1919)
+  // enableIndexedDbPersistence(db).catch(err => {
+  //   if (err.code !== 'failed-precondition' && err.code !== 'unimplemented') {
+  //     console.error('Persistence initialization failed:', err);
+  //   }
+  // });
+ // Real-time listener manager
+ let unsubscribeSnapshot=null;
+ let optionsCache=null;
+ let lastTasksHash=null;
+ 
+  // ── DOM 引用缓存 ──
+  const $taskList = document.getElementById('taskList');
+  const $taskCount = document.getElementById('taskCount');
+  const $completedCount = document.getElementById('completedCount');
+  const $completedList = document.getElementById('completedList');
+  const $calendar = document.getElementById('calendar');
+  const $calendarTitle = document.getElementById('calendarTitle');
+  const $statsOverview = document.getElementById('statsOverview');
+  const $statsDetail = document.getElementById('statsDetail');
+  const $meetingNotifications = document.getElementById('meetingNotifications');
+  const $optMask = document.getElementById('optMask');
+  const $optDrawer = document.getElementById('optDrawer');
+  const $optList = document.getElementById('optList');
+  const $optNewVal = document.getElementById('optNewVal');
+  const $optDrawerTitle = document.getElementById('optDrawerTitle');
+  const $editDrawerMask = document.getElementById('editDrawerMask');
+  const $editDrawer = document.getElementById('editDrawer');
+  const $editTitle = document.getElementById('editTitle');
+  const $editDueDate = document.getElementById('editDueDate');
+  const $editNote = document.getElementById('editNote');
+  const $editDepartment = document.getElementById('editDepartment');
+  const $editBrand = document.getElementById('editBrand');
+  const $editType = document.getElementById('editType');
+  const $editPriority = document.getElementById('editPriority');
+  const $editStartTime = document.getElementById('editStartTime');
+  const $editIsRecurring = document.getElementById('editIsRecurring');
+  const $editRecurringPeriod = document.getElementById('editRecurringPeriod');
+  const $editRecurringPeriodLabel = document.getElementById('editRecurringPeriodLabel');
+
+  // Performance optimization: throttle and debounce
+  function throttle(fn, delay) {
+  let lastCall=0;
+  return function(...args) {
+  const now=Date.now();
+  if (now - lastCall >= delay) {
+  lastCall=now;
+  return fn(...args);
+  }
+  };
+  }
+
+  function debounce(fn, delay) {
+  let timeout;
+  return function(...args) {
+  clearTimeout(timeout);
+  timeout=setTimeout(()=> fn(...args), delay);
+  };
+  }
+
+  // Change detection: simple hash comparison
+  function hashTasks(tasks) {
+  return tasks.reduce((acc, t)=> acc + (t.id || '') + (t.completed ? '1' : '0'), '');
+  }
+
+  function hasTasksChanged(newTasks) {
+  const newHash=hashTasks(newTasks);
+  const changed=newHash !== lastTasksHash;
+  if (changed) lastTasksHash=newHash;
+  return changed;
+  }
+
+ 
+ async function getOptionsDoc() {
+ // Return cached options if available
+ if (optionsCache) {
+ return optionsCache;
+ }
+ const ref=doc(db, 'appData', getAccountDoc(currentAccount, 'options'));
+ const snap=await getDoc(ref);
+ if (!snap.exists()) {
+ const defaultOptions={
+ departments: ['Group A', 'Group B', 'Group C'],
+ brands: ['Tesla', 'NIO', 'XPeng', 'BYD'],
+ taskTypes: ['Follow-up', 'Execution', 'Review', 'Strategy'],
+ priorities: ['Normal', 'Important', 'Urgent']
+ };
+ await setDoc(ref, defaultOptions, { merge: true });
+ optionsCache=defaultOptions;
+ return defaultOptions;
+ }
+ optionsCache=snap.data();
+ return optionsCache;
+ }
+
+ async function saveOptionsDoc(options) {
+ await setDoc(doc(db, 'appData', getAccountDoc(currentAccount, 'options')), options, { merge: true });
+ optionsCache = null; // 🔧 清除缓存，强制下次从Firebase重新读取
+ console.log('[选项保存] 缓存已清除，确保跨设备同步');
+ return options;
+ }
+
+ async function fetchTasks() {
+ const q=query(collection(db, getAccountCollection(currentAccount, 'tasks')), orderBy('createdAt', 'desc'));
+ const snap=await getDocs(q);
+ return snap.docs.map(d=> ({ id: d.id, ...d.data() }));
+ }
+
+ /* async function createTask(task) {
+ const now=new Date();
+ const ref=await addDoc(collection(db, getAccountCollection(currentAccount, 'tasks')), {
+ ...task,
+ completed: false,
+ archived: false,
+ createdAt: Timestamp.fromDate(now)
+ });
+ const docSnap=await getDoc(ref);
+ return { id: docSnap.id, ...docSnap.data() };
+ }
+
+ /* async function updateTask(id, data) {
+  await updateDoc(doc(db, getAccountCollection(currentAccount, 'tasks'), id), data);
+  } */ // end of updateTask
+
+ /* async function deleteTask(id) {
+ await deleteDoc(doc(db, getAccountCollection(currentAccount, 'tasks'), id));
+  console.log('[删除任务] 任务已从Firebase删除:', id);
+  } */ // end of deleteTask
+
+ function normalizeTask(task) {
+ return {
+ id: task.id,
+ itemType: task.itemType || 'task',
+ startTime: task.startTime || '',
+ endTime: task.endTime || '',
+ title: task.title || '',
+ department: task.department || '',
+ brand: task.brand || '',
+ type: task.type || '',
+ priority: task.priority || '',
+ startDate: task.startDate || '',
+ dueDate: task.dueDate || '',
+ note: task.note || '',
+ completed: !!task.completed,
+ archived: !!task.archived,
+ isRecurring: !!task.isRecurring,
+ recurringPeriod: task.recurringPeriod || ''
+ };
+ }
+
+ function getPriorityClass(priority) {
+ if (priority==='Urgent') return 'tag urgent';
+ if (priority==='Important') return 'tag important';
+ return 'tag';
+ }
+
+ // Data validation function
+ function validateTask(task) {
+ if (!task.title || task.title.trim().length===0) return 'Task title cannot be empty';
+ if (task.title.length > 200) return 'Task title cannot exceed 200 characters';
+ if (task.note && task.note.length > 1000) return 'Notescannot exceed 1000 characters';
+ if (task.dueDate && !/^\d{4}-\d{2}-\d{2}$/.test(task.dueDate)) return 'Date format error';
+ return null;
+ }
+
+ function sanitizeInput(text) {
+ if (!text) return '';
+ return text.slice(0, 1000).replace(/[<>\"']/g, c=> ({
+ '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;'
+ }[c]));
+ }
+
+ let state={
+ tasks: [],
+ options: {},
+ stats: {},
+ currentView: 'add',
+ calendarDate: new Date(),
+ selectedCalendarDate: null,
+ filters: { query: '', department: '', brand: '', status: '' },
+ isLoading: false,
+ taskCache: new Map(),
+ dateTasksCache: new Map()
+ };
+ window.state=state;
+
+ // Load data（supportReal-timelistening）
+ async function loadData() {
+ try {
+ state.isLoading=true;
+ optionsCache = null; // 🔧 清除缓存，确保读取最新数据
+ const [tasks, options]=await Promise.all([fetchTasks(), getOptionsDoc()]);
+ state.tasks=tasks.map(normalizeTask);
+ state.options={
+ departments: [],
+ brands: [],
+ taskTypes: [],
+ priorities: [],
+ ...(options || {})
+ };
+ state.stats={};
+
+ renderOptions();
+ renderTasks();
+ if (state.currentView==='stats') renderStats();
+ } catch (err) {
+ console.error(err);
+ // show only
+ if (err.code==='permission-denied') {
+ alert('❌ ： Firebase ');
+ } else if (err.message && err.message.includes('offline')) {
+ console.warn('⚠️ ：data');
+ } else {
+ alert('❌ : ' + (err.message || err));
+ }
+ } finally {
+ state.isLoading=false;
+ }
+ }
+
+  // Real-timelisteningtask - 跨设备同步的关键（带变更检测）
+  function setupRealtimeListener() {
+  if (unsubscribeSnapshot) unsubscribeSnapshot();
+  
+  try {
+  const q=query(collection(db, getAccountCollection(currentAccount, 'tasks')), orderBy('createdAt', 'desc'));
+  unsubscribeSnapshot=onSnapshot(q, 
+  (snapshot)=> {
+  const newTasks=snapshot.docs.map(d=> normalizeTask({ id: d.id, ...d.data() }));
+  // 🔧 变更检测：只有数据真正变化时才重渲染
+  if (!hasTasksChanged(newTasks)) return;
+  state.tasks=newTasks;
+  state.taskCache.clear();
+  state.dateTasksCache.clear();
+  optionsCache = null;
+  renderTasks();
+  if (state.currentView==='calendar') renderCalendar();
+  if (state.currentView==='stats') renderStats();
+  console.log('[实时同步] Firebase数据已更新，共', state.tasks.length, '个任务');
+  },
+  (err)=> {
+  console.error('[实时同步错误]:', err);
+  if (!window.fallbackInterval) {
+  console.log('[降级方案] 启用30秒定时刷新');
+  window.fallbackInterval=setInterval(loadData, 30000);
+  }
+  }
+  );
+  } catch (err) {
+  console.error('[监听设置错误]:', err);
+  }
+  }
+
+
+
+ // data
+ async function refreshData() {
+ try {
+ state.isLoading=true;
+ state.taskCache.clear();
+ state.dateTasksCache.clear();
+ await loadData();
+ alert('✅ datasync');
+ } catch (err) {
+ console.error(err);
+ alert('❌ sync: ' + (err.message || ''));
+ } finally {
+ state.isLoading=false;
+ }
+ }
+
+ // 📍 订阅 store 变化，自动更新 UI
+ store.subscribe((newState) => {
+  // ✅ 只更新 store 相关的属性，保留 state 的其他属性
+  state.tasks = newState.tasks;
+  state.lastVisible = newState.lastVisible;
+  state.pagination = newState.pagination;
+  
+  if (state.currentView === 'todo') {
+    renderTasks();
+  } else if (state.currentView === 'calendar') {
+    renderCalendar();
+  } else if (state.currentView === 'stats') {
+    renderStats();
+  }
+ });
+
+ // 
+ function renderOptions() {
+ const opts=state.options;
+ fillSelect('department', opts.departments || []);
+ fillSelect('brand', opts.brands || []);
+ fillSelect('type', opts.taskTypes || []);
+ fillSelect('priority', opts.priorities || []);
+ }
+
+ function fillSelect(id, items, placeholder) {
+ const select=document.getElementById(id);
+ select.innerHTML=placeholder ? `<option value="">${placeholder}</option>` : '';
+ items.forEach(item=> {
+ const opt=document.createElement('option');
+ opt.value=item;
+ opt.textContent=item;
+ select.appendChild(opt);
+ });
+ }
+
+ // Statistics
+ // ── ──────────────────────────────────────────────────────────
+ const chartState={
+ groupKey: 'department',
+ chartType: 'bar',
+ trendKey: 'dueDate',
+ rangeStart: '',
+ rangeEnd: ''
+ };
+ 
+ // 🔧 防止重复绘制
+ let chartRenderID = 0;
+ let trendRenderID = 0;
+
+ // 🔧 清除日期范围，重新显示所有数据
+ function clearStatsDateRange() {
+ chartState.rangeStart = '';
+ chartState.rangeEnd = '';
+ const startInput = document.getElementById('statsRangeStart');
+ const endInput = document.getElementById('statsRangeEnd');
+ if (startInput) startInput.value = '';
+ if (endInput) endInput.value = '';
+ renderStats();
+ }
+
+ function renderStats() {
+ // date range filter
+ const rs=chartState.rangeStart;
+ const re=chartState.rangeEnd;
+ const allTasks=state.tasks.filter(t=> !t.archived);
+ const tasks=allTasks.filter(t=> {
+ if (!rs && !re) return true;
+ const d=t.startDate || t.dueDate || '';
+   // if (!d) return false;
+  if (!d) return true;
+ if (rs && d < rs) return false;
+ if (re && d > re) return false;
+ return true;
+ });
+ const justTasks = tasks.filter(t => t.itemType !== 'meeting');
+ const meetings = tasks.filter(t => t.itemType === 'meeting');
+ 
+ const total=justTasks.length;
+ const done=justTasks.filter(t=> t.completed).length;
+ const open=total - done;
+ const rate=total ? Math.round(done / total * 100) : 0;
+
+ const mTotal = meetings.length;
+ const mDone = meetings.filter(t => t.completed).length;
+ const mOpen = mTotal - mDone;
+ const mRate = mTotal ? Math.round(mDone / mTotal * 100) : 0;
+
+ document.getElementById('statsOverview').innerHTML=`
+ <div class="stats-section-title">📊 Tasks</div>
+ <div class="stat-card" style="background:rgba(0,122,255,0.08); border-left: 3px solid #007aff;">
+ <span class="stat-value" style="color: #005ecb;">${total}</span><span class="stat-label">Tasks</span>
+ </div>
+ <div class="stat-card" style="background:rgba(52,199,89,0.08); border-left: 3px solid #34c759;">
+ <span class="stat-value" style="color: #1e7d3a;">${done}</span><span class="stat-label">Completed</span>
+ </div>
+ <div class="stat-card" style="background:rgba(255,149,0,0.08); border-left: 3px solid #ff9500;">
+ <span class="stat-value" style="color: #b76b18;">${open}</span><span class="stat-label">Pending</span>
+ </div>
+ <div class="stat-card" style="background:rgba(175,82,222,0.08); border-left: 3px solid #af52de;">
+ <span class="stat-value" style="color: #863aaf;">${rate}%</span><span class="stat-label">Rate</span>
+ </div>
+ <div class="stats-section-title">🤝 Meetings</div>
+ <div class="stat-card" style="background:rgba(90,200,250,0.08); border-left: 3px solid #5ac8fa;">
+   <span class="stat-value" style="color: #0a84ff;">${mTotal}</span><span class="stat-label">Total Meetings</span>
+ </div>
+ <div class="stat-card" style="background:rgba(48,209,88,0.08); border-left: 3px solid #30d158;">
+   <span class="stat-value" style="color: #1e7d3a;">${mDone}</span><span class="stat-label">Meetings Done</span>
+ </div>
+ <div class="stat-card" style="background:rgba(255,149,0,0.08); border-left: 3px solid #ff9500;">
+   <span class="stat-value" style="color: #b76b18;">${mOpen}</span><span class="stat-label">Pending</span>
+ </div>
+ <div class="stat-card" style="background:rgba(175,82,222,0.08); border-left: 3px solid #af52de;">
+   <span class="stat-value" style="color: #863aaf;">${mRate}%</span><span class="stat-label">Rate</span>
+ </div>
+ `;
+
+ // ── data ──
+ const groupKeys=[
+ { label: 'Department', key: 'department' },
+ { label: 'Brand', key: 'brand' },
+ { label: 'Type', key: 'type' },
+ { label: 'Priority', key: 'priority' }
+ ];
+
+ const buildMap=(key, dataset)=> {
+ const map={};
+ dataset.forEach(t=> {
+ const k=((t[key] || '').trim()) || `(${key==='department'?'None':'未设置'})`;
+ if (!map[k]) map[k]={ total: 0, done: 0 };
+ map[k].total++;
+ if (t.completed) map[k].done++;
+ });
+ return Object.entries(map).sort((a,b)=> b[1].total - a[1].total);
+ };
+
+ // ── data（Statisticstask）──
+ const buildTrend=(dataset)=> {
+ const monthly={};
+ dataset.forEach(t=> {
+ const d=t.dueDate || t.startDate;
+ if (!d) return;
+ const ym=d.slice(0,7);
+ if (!monthly[ym]) monthly[ym]={ total:0, done:0 };
+ monthly[ym].total++;
+ if (t.completed) monthly[ym].done++;
+ });
+ return Object.entries(monthly).sort((a,b)=> a[0].localeCompare(b[0]));
+ };
+
+ // ── ──
+ const COLORS=[
+ 'rgba(0,122,255,0.7)','rgba(52,199,89,0.7)','rgba(255,149,0,0.7)',
+ 'rgba(175,82,222,0.7)','rgba(255,59,48,0.7)','rgba(90,200,250,0.7)',
+ 'rgba(255,204,0,0.7)','rgba(48,209,88,0.7)','rgba(100,210,255,0.7)'
+ ];
+
+ // ── HTML ──
+ const groupOpts=groupKeys.map(g=>
+ `<option value="${g.key}" ${chartState.groupKey===g.key?'selected':''}>${g.label}</option>`
+ ).join('');
+ const typeOpts=[
+ ['bar','Bar'],['pie','Pie'],['line','Line'],['progress','Progress']
+ ].map(([v,l])=>
+ `<option value="${v}" ${chartState.chartType===v?'selected':''}>${l}</option>`
+ ).join('');
+
+ const controlBar = `
+ <div class="stats-control-bar">
+   <!-- 日期筛选组 -->
+   <div class="stats-filter-group">
+     <label class="muted-label" style="display:flex;align-items:center;gap:6px;">
+       <span style="font-size:12px;color:var(--muted);font-weight:600">From</span>
+       <input type="date" class="form-select" id="statsRangeStart" value="${chartState.rangeStart}">
+     </label>
+     <label class="muted-label" style="display:flex;align-items:center;gap:6px;">
+       <span style="font-size:12px;color:var(--muted);font-weight:600">To</span>
+       <input type="date" class="form-select" id="statsRangeEnd" value="${chartState.rangeEnd}">
+     </label>
+     <button type="button" class="btn btn-secondary btn-sm" id="btnStatsAllTime">全部</button>
+   </div>
+   <!-- 分组方式 -->
+   <div class="stats-filter-item">
+     <span style="font-size:12px;color:var(--muted);font-weight:600">分组</span>
+     <select id="statsGroupKey" class="form-select" style="min-width:120px;">${groupOpts}</select>
+   </div>
+   <!-- 图表类型 -->
+   <div class="stats-filter-item">
+     <span style="font-size:12px;color:var(--muted);font-weight:600">图表</span>
+     <select id="statsChartType" class="form-select" style="min-width:120px;">${typeOpts}</select>
+   </div>
+   <!-- 确认按钮 -->
+   <div class="stats-filter-action">
+     <button type="button" class="primary-button" id="btnStatsApply" style="min-width:80px;">确认</button>
+   </div>
+ </div>`;
+
+ // ── ──
+ const tEntries=buildMap(chartState.groupKey, justTasks);
+ const mEntries=buildMap(chartState.groupKey, meetings);
+
+ const renderProgress = (entries) => {
+   return entries.map(([name, v], i)=> {
+     const pct=Math.round(v.done / v.total * 100);
+     return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+     <span style="min-width:80px;font-size:13px;font-weight:600;color:var(--ink)">${escapeHtml(name)}</span>
+     <div class="bar-track" style="flex:1">
+     <div class="bar-fill" style="width:${pct}%;background:${COLORS[i%COLORS.length]}"></div>
+     </div>
+     <span style="font-size:12px;color:var(--muted);min-width:70px;text-align:right">${v.done}/${v.total} (${pct}%)</span>
+     </div>`;
+   }).join('') || '<p style="color:var(--muted);font-size:14px;text-align:center;padding:20px 0;">暂无数据</p>';
+ };
+
+ let chartHTMLTasks = chartState.chartType === 'progress' ? renderProgress(tEntries) : `<canvas id="mainChartTasks" style="width:100%;max-height:320px"></canvas>`;
+ let chartHTMLMeetings = chartState.chartType === 'progress' ? renderProgress(mEntries) : `<canvas id="mainChartMeetings" style="width:100%;max-height:320px"></canvas>`;
+
+ // ── （）──
+ const tTrend=buildTrend(justTasks);
+ const mTrend=buildTrend(meetings);
+ const trendHTMLTasks=`<canvas id="trendChartTasks" style="width:100%;max-height:240px"></canvas>`;
+ const trendHTMLMeetings=`<canvas id="trendChartMeetings" style="width:100%;max-height:240px"></canvas>`;
+
+ // ── DOM ──
+ document.getElementById('statsDetail').innerHTML = `
+   <div class="card" style="grid-column:1/-1">
+     ${controlBar}
+   </div>
+   <div class="card">
+     <div class="card-header"><h2 class="card-title">📝 任务统计分布</h2></div>
+     ${chartHTMLTasks}
+   </div>
+   <div class="card">
+     <div class="card-header"><h2 class="card-title">🤝 会议统计分布</h2></div>
+     ${chartHTMLMeetings}
+   </div>
+   <div class="card">
+     <div class="card-header"><h2 class="card-title">📝 任务月度趋势</h2></div>
+     ${trendHTMLTasks}
+   </div>
+   <div class="card">
+     <div class="card-header"><h2 class="card-title">🤝 会议月度趋势</h2></div>
+     ${trendHTMLMeetings}
+   </div>
+ `;
+
+ // 绑定筛选事件（只在首次渲染后绑定一次）
+ setTimeout(() => {
+   const startInput = document.getElementById('statsRangeStart');
+   const endInput = document.getElementById('statsRangeEnd');
+   const groupSel = document.getElementById('statsGroupKey');
+   const chartSel = document.getElementById('statsChartType');
+   const btnApply = document.getElementById('btnStatsApply');
+   const btnAllTime = document.getElementById('btnStatsAllTime');
+   if (btnApply) {
+     btnApply.onclick = function() {
+       chartState.rangeStart = startInput.value;
+       chartState.rangeEnd = endInput.value;
+       chartState.groupKey = groupSel.value;
+       chartState.chartType = chartSel.value;
+       renderStats();
+     };
+   }
+   if (btnAllTime) {
+     btnAllTime.onclick = function() {
+       chartState.rangeStart = '';
+       chartState.rangeEnd = '';
+       if (startInput) startInput.value = '';
+       if (endInput) endInput.value = '';
+     };
+   }
+ }, 0);
+
+ // ── Canvas ──（使用 requestAnimationFrame 替代 setTimeout）
+ if (chartState.chartType !== 'progress') {
+   chartRenderID++;
+   const currentRenderID = chartRenderID;
+   requestAnimationFrame(() => {
+     if (currentRenderID !== chartRenderID) return;
+     const drawChart = (canvasId, entries) => {
+       const canvas = document.getElementById(canvasId);
+       if (!canvas || !entries.length) return;
+       const dpr = window.devicePixelRatio || 1;
+       const W = canvas.offsetWidth || canvas.parentElement.offsetWidth || 300;
+       const H = 300;
+       canvas.width = W * dpr; canvas.height = H * dpr;
+       canvas.style.height = H + 'px';
+       const ctx = canvas.getContext('2d');
+       ctx.scale(dpr, dpr);
+       ctx.clearRect(0, 0, W, H);
+       const lbls = entries.map(([k])=> k);
+       const tots = entries.map(([,v])=> v.total);
+       const dns = entries.map(([,v])=> v.done);
+       if (chartState.chartType === 'bar') drawBar(ctx, W, H, lbls, tots, dns, COLORS);
+       else if (chartState.chartType === 'pie') drawPie(ctx, W, H, lbls, tots, COLORS);
+       else if (chartState.chartType === 'line') drawLine(ctx, W, H, lbls, tots, dns, COLORS);
+     };
+     drawChart('mainChartTasks', tEntries);
+     drawChart('mainChartMeetings', mEntries);
+   });
+ }
+
+ // 趋势图
+ trendRenderID++;
+ const currentTrendID = trendRenderID;
+ requestAnimationFrame(() => {
+   if (currentTrendID !== trendRenderID) return;
+   const drawTrend = (canvasId, entries) => {
+     const tc = document.getElementById(canvasId);
+     if (!tc || !entries.length) return;
+     const dpr = window.devicePixelRatio || 1;
+     const W = tc.offsetWidth || tc.parentElement.offsetWidth || 300, H = 220;
+     tc.width = W * dpr; tc.height = H * dpr;
+     tc.style.height = H + 'px';
+     const ctx2 = tc.getContext('2d');
+     ctx2.scale(dpr, dpr);
+     ctx2.clearRect(0, 0, W, H);
+     const tLabels = entries.map(([k]) => k.slice(5));
+     const tTotals = entries.map(([, v]) => v.total);
+     const tDones = entries.map(([, v]) => v.done);
+     drawLine(ctx2, W, H, tLabels, tTotals, tDones, [
+       'rgba(0,122,255,0.7)', 'rgba(52,199,89,0.7)']);
+   };
+   drawTrend('trendChartTasks', tTrend);
+   drawTrend('trendChartMeetings', mTrend);
+ });
+ }
+
+
+ // ── ──────────────────────────────────────────────────────────
+ function drawBar(ctx, W, H, labels, totals, dones, colors) {
+ const pad={ t:20, r:20, b:48, l:36 };
+ const cW=W - pad.l - pad.r;
+ const cH=H - pad.t - pad.b;
+ const n=labels.length;
+ if (!n) return;
+ const maxV=Math.max(...totals, 1);
+ const grpW=cW / n;
+ const barW=Math.min(grpW * 0.35, 28);
+
+ ctx.clearRect(0, 0, W, H);
+
+ // 
+ ctx.strokeStyle='rgba(60,60,67,0.1)';
+ ctx.lineWidth=1;
+ for (let i=0; i <=4; i++) {
+ const y=pad.t + cH - (cH * i / 4);
+ ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + cW, y); ctx.stroke();
+ ctx.fillStyle='rgba(110,110,115,0.7)';
+ ctx.font='11px system-ui';
+ ctx.textAlign='right';
+ ctx.fillText(Math.round(maxV * i / 4), pad.l - 4, y + 4);
+ }
+
+ labels.forEach((lbl, i)=> {
+ const x=pad.l + grpW * i + grpW / 2;
+ const totalH=(totals[i] / maxV) * cH;
+ const doneH=(dones[i] / maxV) * cH;
+
+ // task（）
+ ctx.fillStyle=colors[i % colors.length].replace('0.7','0.25');
+ ctx.beginPath();
+ ctx.roundRect(x - barW - 2, pad.t + cH - totalH, barW, totalH, 4);
+ ctx.fill();
+
+ // completed（）
+ ctx.fillStyle=colors[i % colors.length];
+ ctx.beginPath();
+ ctx.roundRect(x + 2, pad.t + cH - doneH, barW, doneH, 4);
+ ctx.fill();
+
+ // 
+ ctx.fillStyle='rgba(110,110,115,0.9)';
+ ctx.font='11px system-ui';
+ ctx.textAlign='center';
+ const short=lbl.length > 5 ? lbl.slice(0,5)+'…' : lbl;
+ ctx.fillText(short, x, pad.t + cH + 16);
+
+ // 
+ ctx.fillStyle='rgba(29,29,31,0.8)';
+ ctx.font='bold 11px system-ui';
+ ctx.fillText(totals[i], x - barW/2 - 2, pad.t + cH - totalH - 4);
+ });
+
+ // 
+ const ly=H - 10;
+ [[colors[0].replace('0.7','0.25'),'task'],[colors[0],'completed']].forEach(([c,l], i)=> {
+ ctx.fillStyle=c;
+ ctx.fillRect(pad.l + i*80, ly - 8, 12, 10);
+ ctx.fillStyle='rgba(110,110,115,0.9)';
+ ctx.font='11px system-ui';
+ ctx.textAlign='left';
+ ctx.fillText(l, pad.l + i*80 + 16, ly);
+ });
+ }
+
+ // ── ────────────────────────────────────────────────────────────
+ function drawPie(ctx, W, H, labels, totals, colors) {
+ ctx.clearRect(0, 0, W, H);
+ const total=totals.reduce((a,b)=> a+b, 0);
+ if (!total) return;
+ const cx=W * 0.38, cy=H / 2, r=Math.min(cx, cy) - 20;
+ let angle=-Math.PI / 2;
+
+ totals.forEach((v, i)=> {
+ const slice=(v / total) * Math.PI * 2;
+ ctx.beginPath();
+ ctx.moveTo(cx, cy);
+ ctx.arc(cx, cy, r, angle, angle + slice);
+ ctx.closePath();
+ ctx.fillStyle=colors[i % colors.length];
+ ctx.fill();
+ ctx.strokeStyle='#fff';
+ ctx.lineWidth=2;
+ ctx.stroke();
+
+ // （ > 5%）
+ if (v / total > 0.05) {
+ const mid=angle + slice / 2;
+ const tx=cx + Math.cos(mid) * r * 0.65;
+ const ty=cy + Math.sin(mid) * r * 0.65;
+ ctx.fillStyle='#fff';
+ ctx.font='bold 12px system-ui';
+ ctx.textAlign='center';
+ ctx.fillText(Math.round(v/total*100)+'%', tx, ty + 4);
+ }
+ angle +=slice;
+ });
+
+ // 
+ const legX=W * 0.72, legStartY=cy - (labels.length * 22) / 2;
+ labels.forEach((lbl, i)=> {
+ const ly=legStartY + i * 22;
+ ctx.fillStyle=colors[i % colors.length];
+ ctx.beginPath(); ctx.arc(legX, ly, 7, 0, Math.PI*2); ctx.fill();
+ ctx.fillStyle='rgba(29,29,31,0.85)';
+ ctx.font='12px system-ui';
+ ctx.textAlign='left';
+ const short=lbl.length > 8 ? lbl.slice(0,8)+'…' : lbl;
+ ctx.fillText(short + ' ' + totals[i], legX + 14, ly + 4);
+ });
+ }
+
+ // ── ──────────────────────────────────────────────────────────
+ function drawLine(ctx, W, H, labels, series1, series2, colors) {
+ const pad={ t:20, r:20, b:44, l:36 };
+ const cW=W - pad.l - pad.r;
+ const cH=H - pad.t - pad.b;
+ const n=labels.length;
+ if (!n) return;
+ const maxV=Math.max(...series1, ...series2, 1);
+ ctx.clearRect(0, 0, W, H);
+
+ // 
+ ctx.strokeStyle='rgba(60,60,67,0.1)';
+ ctx.lineWidth=1;
+ for (let i=0; i <=4; i++) {
+ const y=pad.t + cH - (cH * i / 4);
+ ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+cW, y); ctx.stroke();
+ ctx.fillStyle='rgba(110,110,115,0.7)';
+ ctx.font='11px system-ui'; ctx.textAlign='right';
+ ctx.fillText(Math.round(maxV * i / 4), pad.l - 4, y + 4);
+ }
+
+ const drawSeries=(data, color, fill)=> {
+ const pts=data.map((v, i)=> ({
+ x: pad.l + (n===1 ? cW/2 : cW * i / (n-1)),
+ y: pad.t + cH - (v / maxV) * cH
+ }));
+
+ // 
+ if (fill) {
+ ctx.beginPath();
+ ctx.moveTo(pts[0].x, pad.t + cH);
+ pts.forEach(p=> ctx.lineTo(p.x, p.y));
+ ctx.lineTo(pts[pts.length-1].x, pad.t + cH);
+ ctx.closePath();
+ ctx.fillStyle=color.replace('0.7','0.12');
+ ctx.fill();
+ }
+
+ // （）
+ ctx.beginPath();
+ ctx.moveTo(pts[0].x, pts[0].y);
+ for (let i=1; i < pts.length; i++) {
+ const cpx=(pts[i-1].x + pts[i].x) / 2;
+ ctx.bezierCurveTo(cpx, pts[i-1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+ }
+ ctx.strokeStyle=color;
+ ctx.lineWidth=2.5;
+ ctx.stroke();
+
+ // 
+ pts.forEach((p, i)=> {
+ ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+ ctx.fillStyle='#fff'; ctx.fill();
+ ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke();
+ if (data[i] > 0) {
+ ctx.fillStyle='rgba(29,29,31,0.75)';
+ ctx.font='bold 11px system-ui'; ctx.textAlign='center';
+ ctx.fillText(data[i], p.x, p.y - 9);
+ }
+ });
+ };
+
+ drawSeries(series1, colors[0] || 'rgba(0,122,255,0.7)', true);
+ if (series2 && series2.some(v=>v>0)) drawSeries(series2, colors[1] || 'rgba(52,199,89,0.7)', false);
+
+ // X 
+ labels.forEach((lbl, i)=> {
+ const x=pad.l + (n===1 ? cW/2 : cW * i / (n-1));
+ ctx.fillStyle='rgba(110,110,115,0.9)';
+ ctx.font='11px system-ui'; ctx.textAlign='center';
+ ctx.fillText(lbl, x, pad.t + cH + 16);
+ });
+
+ // 
+ const ly=H - 8;
+ [['task', colors[0]||'rgba(0,122,255,0.7)'],['completed', colors[1]||'rgba(52,199,89,0.7)']].forEach(([l,c],i)=> {
+ ctx.strokeStyle=c; ctx.lineWidth=2.5;
+ ctx.beginPath(); ctx.moveTo(pad.l + i*80, ly-4); ctx.lineTo(pad.l + i*80 + 14, ly-4); ctx.stroke();
+ ctx.fillStyle='rgba(110,110,115,0.9)';
+ ctx.font='11px system-ui'; ctx.textAlign='left';
+ ctx.fillText(l, pad.l + i*80 + 18, ly);
+ });
+ }
+
+ // Addtask
+ async function addTask(e) {
+  e.preventDefault();
+
+  // 🔧 从 DOM 中获取 itemType
+  const itemType = document.querySelector('input[name="itemType"]:checked').value;
+  const recurring = document.getElementById('isRecurring').checked;
+  const _now = new Date();
+  const _todayLocal = _now.getFullYear() + '-' + String(_now.getMonth() + 1).padStart(2, '0') + '-' + String(_now.getDate()).padStart(2, '0');
+  const task = {
+    itemType,
+    title: sanitizeInput(document.getElementById('title').value.trim()),
+    department: sanitizeInput(document.getElementById('department').value),
+    brand: sanitizeInput(document.getElementById('brand').value),
+    type: itemType === 'task' ? sanitizeInput(document.getElementById('type').value) : '',
+    priority: itemType === 'task' ? sanitizeInput(document.getElementById('priority').value) : '',
+    startDate: _todayLocal,
+    dueDate: document.getElementById('dueDate').value,
+    startTime: itemType === 'meeting' ? document.getElementById('startTime').value : '',
+    endTime: '',
+    note: sanitizeInput(document.getElementById('note').value.trim()),
+    isRecurring: itemType === 'task' ? recurring : false,
+    recurringPeriod: (itemType === 'task' && recurring) ? document.getElementById('recurringPeriod').value : ''
+  };
+
+  const error = validateTask(task);
+  if (error) { showToast('❌ ' + error, 'error'); return; }
+
+  const tempId = `tmp_${Date.now()}`;
+  const optimistic = { ...task, id: tempId };
+  state.tasks = [...state.tasks, optimistic];
+  renderTasks();
+  try {
+    const docRef = await createTask(task);
+    const realTask = { ...task, id: docRef.id };
+    state.tasks = state.tasks.map(t => t.id === tempId ? realTask : t);
+    renderTasks();
+    showToast('✅ 任务已创建', 'success');
+  } catch (err) {
+    state.tasks = state.tasks.filter(t => t.id !== tempId);
+    renderTasks();
+    handleError(err, 'addTask');
+  }
+}
+
+ // task（completed）
+ function buildTaskCard(task, isCompleted) {
+ const urgentCls=getPriorityClass(task.priority);
+ 
+ // 判断是否过期 (基于本地时间，且未完成)
+ let overdueCls = '';
+ if (!isCompleted && task.dueDate) {
+   const _now = new Date();
+   const _todayLocal = _now.getFullYear() + '-' + String(_now.getMonth() + 1).padStart(2, '0') + '-' + String(_now.getDate()).padStart(2, '0');
+   if (task.dueDate < _todayLocal) {
+     overdueCls = ' overdue';
+   }
+ }
+ 
+ return '<div class="task-card' + (isCompleted ? ' task-card-done' : overdueCls) + '">'
+ + '<div class="task-info">'
+ + '<div class="task-title">' + escapeHtml(task.title) + '</div>'
+ + '<div class="task-meta">'
+ + (task.department ? '<span class="tag">' + escapeHtml(task.department) + '</span>' : '')
+ + (task.brand ? '<span class="tag">' + escapeHtml(task.brand) + '</span>' : '')
+ + (task.type ? '<span class="tag">' + escapeHtml(task.type) + '</span>' : '')
+ + (task.priority ? '<span class="' + urgentCls + '">' + escapeHtml(task.priority) + '</span>' : '')
+ + (task.dueDate ? '<span class="tag date">📅 ' + task.dueDate + '</span>' : '')
+ + (task.isRecurring ? '<span class="tag" style="background:rgba(90,200,250,0.2);color:#0a84ff">🔄 ' + (task.recurringPeriod||'recurring') + '</span>' : '')
+ + '</div>'
+ + (task.note ? '<div class="task-note">' + escapeHtml(task.note) + '</div>' : '')
+ + '</div>'
+ + '<div class="task-actions">'
+ + '<button onclick="openEditDrawer(\'' + task.id + '\')" title="编辑">✏️</button>'
+ + '<button onclick="toggleTask(\'' + task.id + '\')" title="' + (isCompleted ? '撤销' : '完成') + '">' + (isCompleted ? '↩' : '✓') + '</button>'
+ + '<button onclick="removeTask(\'' + task.id + '\')" title="删除" style="color: var(--danger);">🗑️</button>'
+ + '</div>'
+ + '</div>';
+ }
+
+ function renderTasks() {
+ const tasks=state.tasks.filter(t=> !t.archived && !t.completed);
+ 
+ // 增加排序逻辑：过期任务排在最顶端，其次按日期就近排序
+ const _now = new Date();
+ const _todayLocal = _now.getFullYear() + '-' + String(_now.getMonth() + 1).padStart(2, '0') + '-' + String(_now.getDate()).padStart(2, '0');
+ 
+ tasks.sort((a, b) => {
+   const aOverdue = a.dueDate && a.dueDate < _todayLocal;
+   const bOverdue = b.dueDate && b.dueDate < _todayLocal;
+   
+   if (aOverdue && !bOverdue) return -1;
+   if (!aOverdue && bOverdue) return 1;
+   
+   const dateA = a.dueDate || '9999-12-31';
+   const dateB = b.dueDate || '9999-12-31';
+   return dateA.localeCompare(dateB);
+ });
+
+ $taskCount.textContent=tasks.length + ' ';
+// Infinite scroll listener
+if (!$taskList.__scrollBound) {
+  $taskList.addEventListener('scroll', async () => {
+    const s = store.get();
+    if (!s.pagination.hasMore) return;
+    if ($taskList.scrollTop + $taskList.clientHeight >= $taskList.scrollHeight - 200) {
+      const { tasks: more, lastVisible } = await fetchTasksPage(s.lastVisible);
+      store.set({
+        tasks: [...s.tasks, ...more],
+        lastVisible,
+        pagination: { ...s.pagination, hasMore: Boolean(lastVisible) }
+      });
+      renderTasks();
+    }
+  });
+  $taskList.__scrollBound = true;
+}
+ if (tasks.length===0) {
+ $taskList.innerHTML='<div class="empty-state"><div class="empty-state-icon">📢</div><p>暂无任务</p></div>';
+ } else {
+ $taskList.innerHTML=tasks.map(t=> buildTaskCard(t, false)).join('');
+ }
+ const doneTasks=state.tasks.filter(t=> !t.archived && t.completed);
+ if ($completedCount) $completedCount.textContent='(' + doneTasks.length + ')';
+ if ($completedList) {
+ $completedList.innerHTML=doneTasks.length===0
+ ? '<div class="empty-state"><p>No completed tasks</p></div>'
+ : doneTasks.map(t=> buildTaskCard(t, true)).join('');
+ }
+ }
+
+
+ function toggleCompletedSection() {
+ const list=document.getElementById('completedList');
+ const arrow=document.getElementById('completedArrow');
+ if (!list || !arrow) return;
+ const isOpen=list.style.display !== 'none';
+ list.style.display=isOpen ? 'none' : 'block';
+ arrow.style.transform=isOpen ? '' : 'rotate(90deg)';
+ }
+ window.toggleCompletedSection=toggleCompletedSection;
+
+ function toggleRecurring() {
+ const checked=document.getElementById('isRecurring').checked;
+ document.getElementById('recurringPeriodLabel').style.display=checked ? '' : 'none';
+ }
+ window.toggleRecurring=toggleRecurring;
+
+ // 🔧 编辑抽屉中的循环任务切换
+ function toggleEditRecurring() {
+ const checked=document.getElementById('editIsRecurring').checked;
+ document.getElementById('editRecurringPeriodLabel').style.display=checked ? '' : 'none';
+ }
+ window.toggleEditRecurring=toggleEditRecurring;
+
+ // Options management drawer
+ let optDrawerState={ key: '', selectId: '' };
+
+ function openOptDrawer(optionKey, selectId, label) {
+ optDrawerState={ key: optionKey, selectId };
+ document.getElementById('optDrawerTitle').textContent='Manage options: ' + label;
+ document.getElementById('optNewVal').value='';
+ renderOptList();
+ document.getElementById('optMask').style.display='block';
+ document.getElementById('optDrawer').style.display='flex';
+ }
+
+ function closeOptDrawer() {
+ document.getElementById('optMask').style.display='none';
+ document.getElementById('optDrawer').style.display='none';
+ }
+
+ function renderOptList() {
+ const items=(state.options[optDrawerState.key] || []);
+ const list=document.getElementById('optList');
+ if (items.length===0) {
+ list.innerHTML='<p class="empty-msg">暂无选项内容</p>';
+ return;
+ }
+ list.innerHTML=items.map((item, i)=> `
+ <div class="opt-item">
+ <span>${escapeHtml(item)}</span>
+ <button class="btn btn-secondary btn-sm" onclick="editOpt(${i})">✏️</button>
+ <button class="btn btn-secondary btn-sm" style="color:var(--danger)" onclick="deleteOpt(${i})">🗑️</button>
+ </div>
+ `).join('');
+ }
+
+ async function saveNewOpt() {
+ const val=sanitizeInput(document.getElementById('optNewVal').value.trim());
+ if (!val) {
+ alert('❌ Option cannot be empty');
+ return;
+ }
+ if (val.length > 50) {
+ alert('❌ cannot exceed 50 characters');
+ return;
+ }
+ try {
+ const key=optDrawerState.key;
+ const items=[...(state.options[key] || [])];
+ if (items.includes(val)) {
+ alert('❌ ');
+ return;
+ }
+ items.push(val);
+ state.isLoading=true;
+ await saveOptionsDoc({ ...state.options, [key]: items });
+ document.getElementById('optNewVal').value='';
+ await loadData();
+ renderOptList();
+ document.getElementById(optDrawerState.selectId).value=val;
+ } catch (err) {
+ console.error(err);
+ alert('❌ Add: ' + (err.message || ''));
+ } finally {
+ state.isLoading=false;
+ }
+ }
+
+ async function editOpt(index) {
+ const key=optDrawerState.key;
+ const items=[...(state.options[key] || [])];
+ const oldVal=items[index];
+ const newVal=sanitizeInput(prompt('：', oldVal).trim());
+ if (!newVal || newVal===oldVal) return;
+ if (newVal.length > 50) {
+ alert('❌ cannot exceed 50 characters');
+ return;
+ }
+ items[index]=newVal;
+ try {
+ state.isLoading=true;
+ await saveOptionsDoc({ ...state.options, [key]: items });
+ await loadData();
+ renderOptList();
+ } catch (err) {
+ console.error(err);
+ alert('❌ : ' + (err.message || ''));
+ } finally {
+ state.isLoading=false;
+ }
+ }
+
+ async function deleteOpt(index) {
+ const key=optDrawerState.key;
+ const items=[...(state.options[key] || [])];
+ if (!confirm(`「${items[index]}」？`)) return;
+ items.splice(index, 1);
+ try {
+ state.isLoading=true;
+ await saveOptionsDoc({ ...state.options, [key]: items });
+ await loadData();
+ renderOptList();
+ } catch (err) {
+ console.error(err);
+ alert('❌ : ' + (err.message || ''));
+ } finally {
+ state.isLoading=false;
+ }
+ }
+
+ // task
+ // ── Edit TaskDrawer ────────────────────────────────────────────────────
+ let editingTaskId=null;
+
+ function openEditDrawer(id) {
+ const task=state.tasks.find(t=> t.id===id);
+ if (!task) return;
+ editingTaskId=id;
+
+ // characters
+ document.getElementById('editTitle').value=task.title || '';
+ document.getElementById('editDueDate').value=task.dueDate || '';
+ document.getElementById('editNote').value=task.note || '';
+ 
+ const isMeeting = task.itemType === 'meeting';
+ document.querySelectorAll('.edit-meeting-time-row').forEach(el => el.style.display = isMeeting ? 'grid' : 'none');
+ document.getElementById('editTypeRow').style.display = isMeeting ? 'none' : 'grid';
+ document.getElementById('editPriorityRow').style.display = isMeeting ? 'none' : 'grid';
+ document.getElementById('editRecurringRow').style.display = isMeeting ? 'none' : 'flex';
+ 
+ if (isMeeting) {
+   document.getElementById('editStartTime').value = task.startTime || '';
+ } else {
+   document.getElementById('editIsRecurring').checked=!!task.isRecurring;
+   document.getElementById('editRecurringPeriod').value=task.recurringPeriod || 'weekly';
+   document.getElementById('editRecurringPeriodLabel').style.display=task.isRecurring ? '' : 'none';
+ }
+
+ // select（）
+ const opts=state.options;
+ fillEditSelect('editDepartment', opts.departments || [], task.department);
+ fillEditSelect('editBrand', opts.brands || [], task.brand);
+ fillEditSelect('editType', opts.taskTypes || [], task.type);
+ fillEditSelect('editPriority', opts.priorities || [], task.priority);
+
+ document.getElementById('editDrawerMask').style.display='block';
+ document.getElementById('editDrawer').style.display='flex';
+ }
+
+ function fillEditSelect(id, items, current) {
+ const sel=document.getElementById(id);
+ sel.innerHTML='<option value="">— —</option>'
+ + items.map(v=> `<option value="${v}" ${v===current?'selected':''}>${v}</option>`).join('');
+ }
+
+ function closeEditDrawer() {
+ document.getElementById('editDrawerMask').style.display='none';
+ document.getElementById('editDrawer').style.display='none';
+ editingTaskId=null;
+ }
+
+ async function saveEditTask() {
+  if (!editingTaskId) return;
+  const original = state.tasks.find(t => t.id === editingTaskId);
+  if (!original) return;
+  const isMeeting = original.itemType === 'meeting';
+  const isRecurring = document.getElementById('editIsRecurring').checked;
+  const patch = {
+    title: sanitizeInput(document.getElementById('editTitle').value.trim()),
+    department: sanitizeInput(document.getElementById('editDepartment').value),
+    brand: sanitizeInput(document.getElementById('editBrand').value),
+    dueDate: document.getElementById('editDueDate').value,
+    note: sanitizeInput(document.getElementById('editNote').value.trim())
+  };
+  if (isMeeting) {
+    patch.startTime = document.getElementById('editStartTime').value;
+  } else {
+    patch.type = sanitizeInput(document.getElementById('editType').value);
+    patch.priority = sanitizeInput(document.getElementById('editPriority').value);
+    patch.isRecurring = isRecurring;
+    patch.recurringPeriod = isRecurring ? document.getElementById('editRecurringPeriod').value : '';
+  }
+  const error = validateTask(patch);
+  if (error) { showToast('❌ ' + error, 'error'); return; }
+
+  // optimistic update
+  const optimistic = { ...original, ...patch };
+  state.tasks = state.tasks.map(t => t.id === editingTaskId ? optimistic : t);
+  renderTasks();
+  try {
+    await updateTask(editingTaskId, patch);
+    showToast('✅ 任务已更新', 'success');
+    closeEditDrawer();
+  } catch (err) {
+    // rollback
+    state.tasks = state.tasks.map(t => t.id === editingTaskId ? original : t);
+    renderTasks();
+    handleError(err, 'saveEditTask');
+  }
+}
+
+ async function toggleTask(id) {
+ const task=state.tasks.find(t=> t.id===id);
+ if (!task) return;
+ try {
+ state.isLoading=true;
+ await updateTask(id, { completed: !task.completed });
+ console.log('[切换任务] 任务完成状态已更新:', id);
+ } catch (err) {
+ console.error(err);
+ alert('❌ 更新失败: ' + (err.message || ''));
+ } finally {
+ state.isLoading=false;
+ }
+ }
+
+ async function removeTask(id) {
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  if (!confirm('确定要删除 "' + escapeHtml(task.title) + '" 吗？')) return;
+  // optimistic remove
+  const previous = [...state.tasks];
+  state.tasks = state.tasks.filter(t => t.id !== id);
+  renderTasks();
+  try {
+    await deleteTask(id);
+    showToast('✅ 任务已删除', 'success');
+  } catch (err) {
+    // rollback
+    state.tasks = previous;
+    renderTasks();
+    handleError(err, 'removeTask');
+  }
+}
+
+ // Notes
+ async function editNote(id) {
+ const task=state.tasks.find(t=> t.id===id);
+ if (!task) return;
+ const note=prompt('备注：', task.note || '');
+ if (note===null) return;
+ try {
+ state.isLoading=true;
+ const sanitized=sanitizeInput(note.trim());
+ await updateTask(id, { note: sanitized });
+ console.log('[编辑备注] 备注已保存:', id);
+ } catch (err) {
+ console.error(err);
+ alert('❌ 保存失败: ' + (err.message || ''));
+ } finally {
+ state.isLoading=false;
+ }
+ }
+
+ const DOT_COLORS=[
+ '#0d6efd','#198754','#dc3545','#ffc107','#0dcaf0',
+ '#6f42c1','#fd7e14','#20c997','#d63384','#6c757d'
+ ];
+
+ function taskColor(task) {
+ let hash=0;
+ const key=task.id || task.title || '';
+ for (let i=0; i < key.length; i++) hash=(hash * 31 + key.charCodeAt(i)) & 0xffff;
+ return DOT_COLORS[hash % DOT_COLORS.length];
+ }
+
+ function taskOnDate(task, date) {
+ if (task.archived || task.completed) return false;
+ const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+ const start = task.startDate || '';
+ const end = task.dueDate || '';
+ if (start && end) return start <= dateStr && dateStr <= end;
+ if (start) return start === dateStr;
+ if (end) return end === dateStr;
+ return false;
+ }
+
+ // task（）
+ function getTasksForDate(date) {
+ const key = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+ if (!state.dateTasksCache.has(key)) {
+ const tasks=state.tasks.filter(t=> taskOnDate(t, date));
+ state.dateTasksCache.set(key, tasks);
+ }
+ return state.dateTasksCache.get(key);
+ }
+
+ // 
+ function renderCalendar() {
+ const cal=document.getElementById('calendar');
+ const year=state.calendarDate.getFullYear();
+ const month=state.calendarDate.getMonth();
+
+ document.getElementById('calendarTitle').textContent=`${year} 年 ${month + 1} 月`;
+
+ const firstDay=new Date(year, month, 1);
+ const lastDay=new Date(year, month + 1, 0);
+ const offset=(firstDay.getDay() + 6) % 7;
+ const prevMonthLast=new Date(year, month, 0);
+ const daysInPrevMonth=prevMonthLast.getDate();
+ const daysInMonth=lastDay.getDate();
+ const totalCells=offset + daysInMonth;
+ const trailing=(7 - (totalCells % 7)) % 7;
+ const todayStr=new Date().toDateString();
+
+ if (!state.selectedCalendarDate) state.selectedCalendarDate=new Date();
+ const selectedStr=state.selectedCalendarDate.toDateString();
+
+ // 
+ const genCell=(day, m)=> {
+ const date=new Date(year, m, day);
+ const dateStr=date.toDateString();
+ const dayItems=getTasksForDate(date); // 
+ 
+ const hasMeeting = dayItems.some(t => t.itemType === 'meeting' && !t.completed && !t.archived);
+ const tasks = dayItems.filter(t => t.itemType !== 'meeting');
+ 
+ const dots=tasks.map(t=>
+ `<span class="cal-dot" style="background:${taskColor(t)}" title="${escapeHtml(t.title)}"></span>`
+ ).join('');
+ 
+ const isOut=m !==month;
+ const isTdy=!isOut && dateStr===todayStr;
+ const isSel=dateStr===selectedStr;
+ const classes=`calendar-day${isOut ? ' outside' : ''}${isTdy ? ' today' : ''}${isSel ? ' selected' : ''}${hasMeeting && !isOut ? ' has-meeting' : ''}`;
+ const localDateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+ return `<div class="${classes}" data-date="${localDateStr}">
+ <span class="day-number">${day}</span>
+ ${dots ? `<div class="cal-dots">${dots}</div>` : ''}
+ </div>`;
+ };
+
+ let html='';
+ for (let i=0; i < offset; i++) html +=genCell(daysInPrevMonth - offset + 1 + i, month - 1);
+ for (let day=1; day <=daysInMonth; day++) html +=genCell(day, month);
+ for (let i=1; i <=trailing; i++) html +=genCell(i, month + 1);
+
+ cal.innerHTML=html;
+ renderMeetingNotifications();
+ }
+
+ function renderMeetingNotifications() {
+   const container = document.getElementById('meetingNotifications');
+   if (!container) return;
+   const d = new Date();
+   const todayStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+   
+   // 过滤出未过期、未归档且类型为会议的条目（根据今天日期判断）
+   const upcomingMeetings = state.tasks.filter(t => t.itemType === 'meeting' && !t.completed && !t.archived && t.dueDate >= todayStr);
+   
+   upcomingMeetings.sort((a,b) => (a.dueDate + (a.startTime||'')).localeCompare(b.dueDate + (b.startTime||'')));
+   
+   if (upcomingMeetings.length === 0) {
+     container.innerHTML = '';
+     container.style.display = 'none';
+     return;
+   }
+   
+   container.style.display = 'grid';
+   container.innerHTML = upcomingMeetings.map(m => `
+     <div class="meeting-banner">
+       <div class="meeting-banner-icon">🤝</div>
+       <div class="meeting-banner-info">
+         <div class="meeting-banner-title">${escapeHtml(m.title)}</div>
+         <div class="meeting-banner-meta">
+           <span class="highlight">🤝 Meeting</span>
+           <span>📅 ${m.dueDate}</span>
+           ${m.startTime ? `<span>⏰ ${m.startTime}${m.endTime ? '-' + m.endTime : ''}</span>` : ''}
+           ${m.department ? `<span>${escapeHtml(m.department)}</span>` : ''}
+           ${m.brand ? `<span>${escapeHtml(m.brand)}</span>` : ''}
+         </div>
+       </div>
+     </div>
+   `).join('');
+ }
+
+ function openDayDialog(date) {
+ state.selectedCalendarDate=date;
+ renderDayDialog(date);
+ const dialog=document.getElementById('calendarDayDialog');
+ if (!dialog) return;
+ if (!dialog.open) dialog.showModal();
+ }
+
+ function closeDayDialog() {
+ const dialog=document.getElementById('calendarDayDialog');
+ if (dialog && dialog.open) dialog.close();
+ }
+
+ function renderDayDialog(date) {
+ const title=document.getElementById('calendarDetailTitle');
+ const list=document.getElementById('calendarDayDialogTasks');
+ const dateLabel = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+ title.textContent=`${dateLabel} Incomplete Tasks`;
+ const tasks=state.tasks.filter(t=> !t.archived && !t.completed && taskOnDate(t, date));
+ 
+ // 统一排序逻辑：按截止日期和时间从早到晚排序
+ tasks.sort((a, b) => {
+   const dateA = a.dueDate || '9999-12-31';
+   const dateB = b.dueDate || '9999-12-31';
+   if (dateA !== dateB) return dateA.localeCompare(dateB);
+   const timeA = a.startTime || '23:59';
+   const timeB = b.startTime || '23:59';
+   return timeA.localeCompare(timeB);
+ });
+ 
+ if (!tasks.length) {
+ list.innerHTML='<div class="empty-state"><div class="empty-state-icon">📭</div><p>Incomplete Tasks</p></div>';
+ return;
+ }
+ list.innerHTML=tasks.map(task=> {
+ const isMeeting = task.itemType === 'meeting';
+ const urgentCls=getPriorityClass(task.priority);
+ const escapedTitle=escapeHtml(task.title);
+ const escapedNote=task.note ? escapeHtml(task.note) : '';
+ return '<div class="day-task-card" data-task-id="' + task.id + '">'
+ + '<label>'
+ + '<input type="checkbox" aria-label="completedtask">'
+ + '<div>'
+ + '<strong>' + escapedTitle + '</strong>'
+ + '<div class="task-meta">'
+ + (isMeeting ? '<span class="tag" style="background:var(--accent);color:white;border-color:var(--accent)">🤝 Meeting</span>' : '')
+ + (task.department ? '<span class="tag">' + escapeHtml(task.department) + '</span>' : '')
+ + (task.brand ? '<span class="tag">' + escapeHtml(task.brand) + '</span>' : '')
+ + (!isMeeting && task.type ? '<span class="tag">' + escapeHtml(task.type) + '</span>' : '')
+ + (!isMeeting && task.priority ? '<span class="' + urgentCls + '">' + escapeHtml(task.priority) + '</span>' : '')
+ + (task.dueDate ? '<span class="tag date">📅 ' + task.dueDate + '</span>' : '')
+ + (isMeeting && task.startTime ? '<span class="tag">⏰ ' + task.startTime + (task.endTime ? '-' + task.endTime : '') + '</span>' : '')
+ + '</div>'
+ + (escapedNote ? '<div class="task-note">' + escapedNote + '</div>' : '')
+ + '</div>'
+ + '</label>'
+ + '</div>';
+ }).join('');
+ list.querySelectorAll('.day-task-card').forEach(card=> {
+ const taskId=card.dataset.taskId;
+ const checkbox=card.querySelector('input[type="checkbox"]');
+ if (checkbox) checkbox.addEventListener('change', ()=> completeDayTask(taskId, card));
+ });
+ }
+
+ function completeDayTask(id, card) {
+ if (!card) return;
+ card.classList.add('completing');
+ const checkbox=card.querySelector('input[type="checkbox"]');
+ if (checkbox) checkbox.disabled=true;
+ setTimeout(()=> {
+ toggleTask(id);
+ closeDayDialog();
+ }, 240);
+ }
+
+ function prevMonth() {
+ state.calendarDate.setMonth(state.calendarDate.getMonth() - 1);
+ renderCalendar();
+ }
+
+ function nextMonth() {
+ state.calendarDate.setMonth(state.calendarDate.getMonth() + 1);
+ renderCalendar();
+ }
+
+ function today() {
+ state.calendarDate=new Date();
+ renderCalendar();
+ }
+
+  // 🔧 优化：纯字符串替换，避免创建 DOM 元素
+  function escapeHtml(text) {
+  if (!text) return '';
+  const map = {'&':'&','<':'<','>':'>','"':'"',"'":'&#x27;'};
+  return String(text).replace(/[&<>"']/g, c => map[c]);
+  }
+
+
+ // inline handler 
+ window.loadData=loadData;
+ window.refreshData=refreshData;
+ window.addTask=addTask;
+ window.currentAccount=currentAccount;
+ window.openOptDrawer=openOptDrawer;
+ window.closeOptDrawer=closeOptDrawer;
+ 
+ // 暴露账户操作函数到全局
+ window.getAccountsList = function() {
+   return [currentAccount || ''];
+ };
+ 
+ window.updateAccountPassword = function() {
+   alert('请使用系统内的修改密码功能。密码现已通过 Firebase 强制线上托管。');
+   return false;
+ };
+ window.saveNewOpt=saveNewOpt;
+ window.editOpt=editOpt;
+ window.deleteOpt=deleteOpt;
+ window.openEditDrawer=openEditDrawer;
+ window.fillEditSelect=fillEditSelect;
+ window.closeEditDrawer=closeEditDrawer;
+ window.saveEditTask=saveEditTask;
+ window.toggleTask=toggleTask;
+ window.removeTask=removeTask;
+ window.editNote=editNote;
+ window.renderCalendar=renderCalendar;
+ window.renderTasks=renderTasks;
+ window.renderStats=renderStats;
+ window.prevMonth=prevMonth;
+ window.nextMonth=nextMonth;
+ window.today=today;
+ window.openDayDialog=openDayDialog;
+ window.closeDayDialog=closeDayDialog;
+
+ // Export login functions
+ window.initLogin=initLogin;
+ window.showLoginDialog=showLoginDialog;
+ window.hideLoginDialog=hideLoginDialog;
+ window.showAddUserDialog=showAddUserDialog;
+ window.hideAddUserDialog=hideAddUserDialog;
+ window.showChangePasswordDialog=showChangePasswordDialog;
+ window.hideChangePasswordDialog=hideChangePasswordDialog;
+ window.showChangeAvatarDialog=showChangeAvatarDialog;
+ window.hideChangeAvatarDialog=hideChangeAvatarDialog;
+ window.login=login;
+ window.addNewUser=addNewUser;
+ window.changePassword=changePassword;
+ window.changeAvatar=changeAvatar;
+ window.logout=logout;
+ window.showApp=showApp;
+ window.updateCurrentUserDisplay=updateCurrentUserDisplay;
+ 
+ window.toggleItemType = function() {
+  const type = document.querySelector('input[name="itemType"]:checked').value;
+  const meetingRows = document.querySelectorAll('.meeting-time-row');
+  const taskRows = document.querySelectorAll('.task-only-row');
+  const titleLabel = document.getElementById('titleLabel');
+  const dateLabel = document.getElementById('dateLabel');
+
+  if (type === 'meeting') {
+    meetingRows.forEach(r => r.style.display = 'grid');
+    taskRows.forEach(r => r.style.display = 'none');
+    titleLabel.textContent = 'Meeting Subject';
+    dateLabel.textContent = 'Meeting Date';
+  } else {
+    meetingRows.forEach(r => r.style.display = 'none');
+    taskRows.forEach(r => r.style.display = 'grid');
+    titleLabel.textContent = 'Task Content';
+    dateLabel.textContent = 'Due Date';
+  }
+ };
+
+ function renderLoginAccountSuggestions() {
+   const suggestions = document.getElementById('loginAccountSuggestions');
+   if (!suggestions) return;
+   suggestions.innerHTML = '';
+   getLoginHistory().forEach(acc => {
+     const option = document.createElement('option');
+     option.value = acc;
+     suggestions.appendChild(option);
+   });
+ }
+
+ function initLogin() {
+   // 监听 Firebase 的真实登录状态
+   onAuthStateChanged(auth, (user) => {
+     if (user) {
+       // 提取邮箱前缀作为系统用户名 (例如 AAA@evplanner.local -> AAA)
+       currentAccount = user.email.split('@')[0].toUpperCase();
+       globalThis.currentAccount = currentAccount;
+       showApp();
+     } else {
+       showLoginDialog();
+     }
+   });
+ }
+
+ function showLoginDialog() {
+   renderLoginAccountSuggestions();
+   const usernameInput = document.getElementById('loginUsername');
+   if (usernameInput && !usernameInput.value) usernameInput.value = currentAccount || '';
+   document.getElementById('loginDialog').classList.add('show');
+   document.getElementById('appShell').style.display = 'none';
+ }
+
+ function hideLoginDialog() {
+   document.getElementById('loginDialog').classList.remove('show');
+ }
+
+ function showAddUserDialog() {
+   document.getElementById('addUserDialog').classList.add('show');
+ }
+
+ function hideAddUserDialog() {
+   document.getElementById('addUserDialog').classList.remove('show');
+ }
+
+ function showChangePasswordDialog() {
+   document.getElementById('changePasswordDialog').classList.add('show');
+ }
+
+ function hideChangePasswordDialog() {
+   document.getElementById('changePasswordDialog').classList.remove('show');
+ }
+
+ function showChangeAvatarDialog() {
+   document.getElementById('changeAvatarDialog').classList.add('show');
+ }
+
+ function hideChangeAvatarDialog() {
+   document.getElementById('changeAvatarDialog').classList.remove('show');
+ }
+
+ async function login() {
+   const usernameInput = document.getElementById('loginUsername');
+   const passwordInput = document.getElementById('loginPassword');
+   const selectedUser = normalizeAccountName(usernameInput.value);
+   const enteredPassword = passwordInput.value;
+   
+   if (!selectedUser) {
+     alert('Please enter your account name');
+     usernameInput.focus();
+     return;
+   }
+   
+   try {
+     // 拼接虚拟邮箱域名传递给 Firebase
+     const fakeEmail = selectedUser + '@evplanner.local';
+     await signInWithEmailAndPassword(auth, fakeEmail, enteredPassword);
+     
+     // 登录成功后，将账号存入本地历史记录提示列表
+     saveLoginHistory(selectedUser);
+     
+     hideLoginDialog();
+     passwordInput.value = '';
+   } catch (error) {
+     if (error.code === 'auth/invalid-login-credentials' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+       alert('登录失败：账号不存在或密码错误。\n\n如果您是旧版本用户，请点击下方的 "Add User" 重新注册您的旧账号（如 AAA）。\n注册成功后，您的历史数据会自动恢复！');
+     } else {
+       alert('Login failed: ' + error.message);
+     }
+   }
+ }
+
+ async function addNewUser() {
+   const usernameInput = document.getElementById('newUsername');
+   const passwordInput = document.getElementById('newPassword');
+   const username = normalizeAccountName(usernameInput.value);
+   const password = passwordInput.value.trim();
+   
+   if (!username || password.length < 6) {
+     alert('Please enter username and a password (min 6 chars)');
+     return;
+   }
+   
+   try {
+     const fakeEmail = username + '@evplanner.local';
+     await createUserWithEmailAndPassword(auth, fakeEmail, password);
+     hideAddUserDialog();
+     usernameInput.value = '';
+     passwordInput.value = '';
+     alert('✅ Account created successfully!');
+   } catch (error) {
+     alert('Failed to add user: ' + error.message);
+   }
+ }
+
+ async function changePassword() {
+   const currentPasswordInput = document.getElementById('currentPassword');
+   const newPasswordInput = document.getElementById('newPasswordInput');
+   const confirmPasswordInput = document.getElementById('confirmPassword');
+   
+   const currentPassword = currentPasswordInput.value;
+   const newPassword = newPasswordInput.value;
+   const confirmPassword = confirmPasswordInput.value;
+   
+   if (newPassword !== confirmPassword) {
+     alert('New passwords do not match');
+     return;
+   }
+   
+   try {
+     // Firebase Auth 可以直接调用 API 修改密码 (注意：长时间未登录可能需重新验证)
+     await updatePassword(auth.currentUser, newPassword);
+     hideChangePasswordDialog();
+     currentPasswordInput.value = '';
+     newPasswordInput.value = '';
+     confirmPasswordInput.value = '';
+     alert('✅ Password changed successfully');
+   } catch (error) {
+     alert('Failed to change password: ' + error.message);
+   }
+ }
+
+ function changeAvatar() {
+   const avatarText = document.getElementById('avatarText').value.trim();
+   if (avatarText) {
+     // Here you could save avatar text to localStorage or Firebase
+     localStorage.setItem(`avatar_${currentAccount}`, avatarText);
+     updateCurrentUserDisplay();
+     hideChangeAvatarDialog();
+   }
+ }
+
+ async function logout() {
+   try {
+     await signOut(auth);
+     currentAccount = null;
+     globalThis.currentAccount = null;
+     document.getElementById('appShell').style.display = 'none';
+   } catch (error) {
+     console.error('Logout error', error);
+   }
+ }
+
+ function showApp() {
+   document.getElementById('appShell').style.display = 'block';
+   updateCurrentUserDisplay();
+   loadData();
+ }
+
+ function updateCurrentUserDisplay() {
+   const display = document.getElementById('currentUserDisplay');
+   const avatarText = localStorage.getItem(`avatar_${currentAccount}`) || currentAccount;
+   display.textContent = `👤 ${avatarText}`;
+ }
+
+ const calendarDayDialog=document.getElementById('calendarDayDialog');
+ if (calendarDayDialog) {
+ calendarDayDialog.addEventListener('click', e=> {
+ if (e.target===calendarDayDialog) closeDayDialog();
+ });
+ calendarDayDialog.addEventListener('cancel', e=> {
+ e.preventDefault();
+ closeDayDialog();
+ });
+ }
+
+ const calendarEl=document.getElementById('calendar');
+ if (calendarEl) {
+ calendarEl.addEventListener('click', e=> {
+ const cell=e.target.closest('.calendar-day');
+ if (!cell || !cell.dataset.date) return;
+ const parts = cell.dataset.date.split('-');
+ state.selectedCalendarDate=new Date(parts[0], parts[1] - 1, parts[2]);
+ renderCalendar();
+ openDayDialog(state.selectedCalendarDate);
+ });
+ }
+
+ // Initialize login system
+ initLogin();
+ 
+ // 页面可见性变化时重连（手机切换应用后回来）
+ document.addEventListener('visibilitychange', ()=> {
+ if (document.visibilityState === 'visible') {
+ if (!unsubscribeSnapshot) {
+ loadData().then(() => setupRealtimeListener());
+ } else {
+ loadData();
+ }
+ }
+ });
+
+ // ：Real-timelistening，30
+ const syncInterval=setInterval(()=> {
+ if (document.visibilityState==='visible' && !unsubscribeSnapshot) {
+ loadData();
+ }
+ }, 30000);
+
+ // 
+ window.addEventListener('beforeunload', ()=> {
+ if (unsubscribeSnapshot) unsubscribeSnapshot();
+ clearInterval(syncInterval);
+ if (window.fallbackInterval) clearInterval(window.fallbackInterval);
+ });
+ 
+</script>
+<script>
+// data-view
+document.querySelectorAll('.view-tabs button').forEach(btn=> {
+ btn.addEventListener('click', function() {
+ const view=this.dataset.viewTarget;
+ document.body.dataset.view=view;
+ document.querySelectorAll('.view-tabs button').forEach(b=> b.classList.remove('active'));
+ this.classList.add('active');
+ if (view==='calendar') renderCalendar();
+ if (view==='todo') renderTasks();
+ if (view==='stats') renderStats();
+ state.currentView=view;
+ });
+});
+
+// Detect iOS
+const isIOS = () => {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+};
+
+// Register Service Worker - PWA offline support with iOS fixes
+if ('serviceWorker' in navigator) {
+ window.addEventListener('load', ()=> {
+  // 修复：直接加载 sw.js，利用浏览器默认生命周期更新，避免 iOS 陷入无限注册耗电循环
+  const swPath = './sw.js';
+  console.log('[PWA] Registering Service Worker for iOS:', isIOS());
+  
+  navigator.serviceWorker.register(swPath, {
+   scope: './'
+  })
+  .then((registration)=> {
+   console.log('[PWA] Service Worker registered successfully', registration);
+   
+   // Check for updates
+   registration.onupdatefound=()=> {
+    const newWorker=registration.installing;
+    newWorker.onstatechange=()=> {
+     if (newWorker.state==='installed' && navigator.serviceWorker.controller) {
+      console.log('[PWA] New version available, prompt user to update');
+      // Can display update notification to user
+      const event=new CustomEvent('update-available');
+      window.dispatchEvent(event);
+     }
+     if (newWorker.state==='installed' && !navigator.serviceWorker.controller) {
+      console.log('[PWA] Service Worker installed for first time');
+     }
+    };
+   };
+   
+   // Check for updates periodically (every 1 hour)
+   setInterval(()=> {
+    registration.update().catch((err)=> {
+     console.warn('[PWA] Failed to check for updates:', err);
+    });
+   }, 60 * 60 * 1000);
+  })
+  .catch((err)=> {
+   console.error('[PWA] Service Worker registration failed:', err);
+   // Try to re-register if initial registration failed (iOS fix)
+   if (isIOS()) {
+    setTimeout(() => {
+     console.log('[PWA] Retrying SW registration for iOS...');
+     navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .catch((retryErr) => console.error('[PWA] SW registration retry failed:', retryErr));
+    }, 2000);
+   }
+  });
+ });
+ 
+ // Listen for Service Worker control change
+ navigator.serviceWorker.addEventListener('controllerchange', ()=> {
+  console.log('[PWA] Service Worker has taken over the page');
+ });
+ 
+ // Trigger iOS sync when app becomes active
+ if (isIOS()) {
+  document.addEventListener('visibilitychange', () => {
+   if (document.visibilityState === 'visible' && navigator.serviceWorker.controller) {
+    console.log('[PWA] iOS app became visible, triggering sync');
+    navigator.serviceWorker.controller.postMessage({ type: 'iOS_SYNC' });
+   }
+  });
+ }
+}
+
+// Listen for app update event
+window.addEventListener('update-available', ()=> {
+ console.log('[PWA] Application has updates, user can choose to reload');
+});
+
+// Support offline indicator
+window.addEventListener('online', ()=> {
+ console.log('[PWA] 应用已返回在线，触发数据同步');
+ document.dispatchEvent(new Event('app-online'));
+ // 返回在线时立即同步
+ loadData().then(() => {
+ if (!unsubscribeSnapshot) {
+ setupRealtimeListener();
+ }
+ }).catch(err => console.error('[在线同步失败]:', err));
+});
+
+window.addEventListener('offline', ()=> {
+ console.log('[PWA] Application is offline');
+ document.dispatchEvent(new Event('app-offline'));
+});
+
+// Prevent iOS from caching outdated pages
+if (isIOS && isIOS()) {
+  window.addEventListener('beforeunload', () => {
+    // Trigger SW update check on iOS
+    if (navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'CHECK_UPDATE' });
+    }
+  });
+}
+
+window.addEventListener('offline', ()=> {
+ console.log('[PWA] Application is now offline');
+ document.dispatchEvent(new Event('app-offline'));
+});
+
+console.log('[PWA] Initialization complete');
+
+// Excel Export Function
+function exportToExcel() {
+ if (!state.tasks || state.tasks.length === 0) {
+ alert('No tasks to export');
+ return;
+ }
+
+ // Helper function to escape CSV values
+ const escapeCSV = (val) => {
+ if (!val) return '';
+ const str = String(val);
+ // Escape double quotes by doubling them
+ return str.replace(/"/g, '""');
+ };
+
+ // Create CSV content
+ const headers = ['Item Type', 'Task ID', 'Title', 'Department', 'Brand', 'Type', 'Priority', 'Start Date', 'Due Date', 'Start Time', 'End Time', 'Notes', 'Status'];
+ const rows = state.tasks.map(task => [
+ task.itemType === 'meeting' ? 'Meeting' : 'Task',
+ task.id || '',
+ escapeCSV(task.title || ''),
+ escapeCSV(task.department || ''),
+ escapeCSV(task.brand || ''),
+ escapeCSV(task.type || ''),
+ escapeCSV(task.priority || ''),
+ task.startDate || '',
+ task.dueDate || '',
+ task.startTime || '',
+ task.endTime || '',
+ escapeCSV(task.note || ''),
+ task.completed ? 'Completed' : (task.archived ? 'Archived' : 'Active')
+ ]);
+
+ // Build CSV string
+ let csvContent = headers.map(h => `"${h}"`).join(',') + '\n';
+ rows.forEach(row => {
+ csvContent += row.map(cell => `"${cell}"`).join(',') + '\n';
+ });
+
+ // Create download link with proper encoding
+ const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+ const link = document.createElement('a');
+ const url = URL.createObjectURL(blob);
+ link.setAttribute('href', url);
+ const _now = new Date();
+ const dateStrExp = _now.getFullYear() + '-' + String(_now.getMonth() + 1).padStart(2, '0') + '-' + String(_now.getDate()).padStart(2, '0');
+ link.setAttribute('download', `tasks_${currentAccount}_${dateStrExp}.csv`);
+ link.style.visibility = 'hidden';
+ document.body.appendChild(link);
+ link.click();
+ document.body.removeChild(link);
+ URL.revokeObjectURL(url);
+
+ alert(`✅ Successfully exported ${state.tasks.length} tasks from account ${currentAccount}`);
+}
+
+</script>
+
+<div id="toast" class="toast" aria-live="polite" style="opacity:0;"></div>
+</body>
+</html>
